@@ -234,3 +234,71 @@
     transform: scale(1);
   }
 }
+
+/* Print styles for receipt */
+@media print {
+  @page {
+    margin: 10mm;
+    size: A4;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #receipt-content,
+  #receipt-content * {
+    visibility: visible;
+  }
+
+  #receipt-content {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 210mm !important;
+    max-width: none !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\\:border-0 {
+    border: none !important;
+  }
+
+  .print\\:max-w-none {
+    max-width: none !important;
+  }
+
+  /* Force background colors for printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Ensure images are printed */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Prevent page breaks inside the receipt */
+  .card {
+    page-break-inside: avoid;
+  }
+
+  /* Remove any hover effects */
+  *:hover {
+    background: transparent !important;
+  }
+}

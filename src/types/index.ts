@@ -25,6 +25,7 @@ export interface SaleItem {
   productName: string;
   quantity: number;
   unitPrice: number;
+  imageUrl?: string;
 }
 
 export interface Sale {
@@ -76,8 +77,11 @@ export interface StockMovement {
 
 export interface User {
   id: string;
-  name: string;
+  name: string; // Kept for backward compatibility (computed from firstName + lastName)
+  firstName: string;
+  lastName: string;
   email: string;
+  phone?: string;
   role: UserRole;
   avatar?: string;
   active: boolean;

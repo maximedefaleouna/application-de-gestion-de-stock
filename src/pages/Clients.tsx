@@ -11,6 +11,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { mockClients, mockSales } from "@/data/mockData";
 import { Client } from "@/types";
 import { Plus, Search, Phone, MapPin, CreditCard, User, AlertTriangle, Eye } from "lucide-react";
@@ -23,6 +24,8 @@ export default function Clients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [phone, setPhone] = useState<string | undefined>("+228");
+  const [phoneError, setPhoneError] = useState("");
 
   const filteredClients = mockClients.filter((c) =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,6 +36,31 @@ export default function Clients() {
   const clientsAvecCredit = mockClients.filter(c => c.totalCredit - c.totalPaid > 0).length;
 
   const getClientSales = (clientId: string) => mockSales.filter(s => s.clientId === clientId);
+
+  const validatePhone = (value: string | undefined) => {
+    if (!value) {
+      setPhoneError("Le numéro de téléphone est requis");
+      return false;
+    }
+    
+    // Vérifier que le numéro commence par un indicatif valide
+    const phoneRegex = /^\+[1-9]\d{1,3}\d{6,14}$/;
+    if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+      setPhoneError("Numéro de téléphone invalide. Exemple: +22877123456");
+      return false;
+    }
+    
+    setPhoneError("");
+    return true;
+  };
+
+  const handleSaveClient = () => {
+    if (!validatePhone(phone)) {
+      return;
+    }
+    // Logique d'enregistrement du client
+    setIsAddDialogOpen(false);
+  };
 
   return (
     <AdminLayout title="Clients & Crédits" subtitle="Gérez vos clients et suivez les crédits en cours">
@@ -96,13 +124,30 @@ export default function Clients() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2"><Label>Nom complet</Label><Input placeholder="Ex: Mamadou Diallo" /></div>
-              <div className="space-y-2"><Label>Téléphone</Label><Input placeholder="77 123 45 67" /></div>
+              <div className="space-y-2">
+                <Label>Téléphone <span className="text-destructive">*</span></Label>
+                <PhoneInput 
+                  placeholder="77 123 45 67" 
+                  value={phone} 
+                  onChange={(value) => {
+                    setPhone(value);
+                    if (value) setPhoneError("");
+                  }} 
+                  defaultCountry="TG" 
+                />
+                {phoneError && (
+                  <p className="text-sm text-destructive flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    {phoneError}
+                  </p>
+                )}
+              </div>
               <div className="space-y-2"><Label>Email (optionnel)</Label><Input type="email" placeholder="email@example.com" /></div>
               <div className="space-y-2"><Label>Adresse</Label><Input placeholder="Dakar, Médina" /></div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Annuler</Button>
-              <Button className="gradient-primary text-primary-foreground">Enregistrer</Button>
+              <Button className="gradient-primary text-primary-foreground" onClick={handleSaveClient}>Enregistrer</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

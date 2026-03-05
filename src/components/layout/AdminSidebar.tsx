@@ -10,9 +10,11 @@ import {
   Settings,
   LogOut,
   Wrench,
+  User,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const navItems = [
   { title: "Tableau de bord", url: "/", icon: LayoutDashboard },
@@ -23,6 +25,12 @@ const navItems = [
   { title: "Utilisateurs", url: "/users", icon: Users },
   { title: "Alertes", url: "/notifications", icon: Bell },
   { title: "Statistiques", url: "/stats", icon: BarChart3 },
+  { title: "Configuration", url: "/configuration", icon: Settings },
+];
+
+// Footer items (not part of main navigation)
+const footerItems = [
+  { title: "Mon Profil", url: "/profile", icon: User },
 ];
 
 interface AdminSidebarProps {
@@ -31,6 +39,18 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear auth data
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    
+    toast.success("Déconnexion réussie");
+    
+    // Redirect to login
+    navigate("/login");
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col lg:flex">
@@ -80,15 +100,27 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
 
       {/* Footer */}
       <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
-        <NavLink
-          to="/settings"
-          onClick={onNavigate}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200"
+        {footerItems.map((item) => (
+          <NavLink
+            key={item.title}
+            to={item.url}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              }`
+            }
+          >
+            <item.icon className="w-5 h-5" />
+            <span>{item.title}</span>
+          </NavLink>
+        ))}
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-muted hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
         >
-          <Settings className="w-5 h-5" />
-          <span>Paramètres</span>
-        </NavLink>
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-muted hover:bg-destructive/10 hover:text-destructive transition-all duration-200">
           <LogOut className="w-5 h-5" />
           <span>Déconnexion</span>
         </button>

@@ -4,32 +4,39 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentSales } from "@/components/dashboard/RecentSales";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { TopProducts } from "@/components/dashboard/TopDishes";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { PeriodSelector, DateRangeType } from "@/components/PeriodSelector";
 import { mockDashboardStats, mockProducts } from "@/data/mockData";
 import { ShoppingCart, TrendingUp, AlertTriangle, CreditCard, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { DateRange } from "react-day-picker";
 
 const formatCFA = (amount: number) => amount.toLocaleString('fr-FR') + ' F';
 
+interface CustomDateRange {
+  from: Date | undefined;
+  to?: Date | undefined;
+}
+
 export default function Dashboard() {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(2024, 11, 18),
-    to: new Date(2024, 11, 24),
+  const [dateRange, setDateRange] = useState<CustomDateRange>({
+    from: new Date(),
+    to: new Date(),
   });
+  const [currentPeriod, setCurrentPeriod] = useState<DateRangeType>('today');
   const lowStockProducts = mockProducts.filter(p => p.stock <= p.minStock);
+
+  const handlePeriodChange = (period: DateRangeType, range: CustomDateRange) => {
+    setCurrentPeriod(period);
+    setDateRange(range);
+  };
 
   return (
     <AdminLayout 
       title="Tableau de bord" 
       subtitle="Bienvenue ! Voici un aperçu de votre activité"
     >
-      {/* Date Range Filter */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-        <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} className="w-full sm:w-auto" />
-        <p className="text-sm text-muted-foreground">
-          Données affichées pour la période sélectionnée
-        </p>
+      {/* Period Selector - Simple inline */}
+      <div className="mb-6">
+        <PeriodSelector onPeriodChange={handlePeriodChange} />
       </div>
 
       {/* Stats Grid */}

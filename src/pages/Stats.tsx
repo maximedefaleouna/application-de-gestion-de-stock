@@ -2,31 +2,42 @@ import { useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { PeriodSelector, DateRangeType } from "@/components/PeriodSelector";
 import { mockDashboardStats, weeklyRevenueData, categoryData } from "@/data/mockData";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
 import { Download, TrendingUp, ShoppingCart, CreditCard } from "lucide-react";
-import { DateRange } from "react-day-picker";
+
+interface CustomDateRange {
+  from: Date | undefined;
+  to?: Date | undefined;
+}
 
 const formatCFA = (amount: number) => amount.toLocaleString('fr-FR') + ' F';
 
 export default function Stats() {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(2024, 11, 18),
-    to: new Date(2024, 11, 24),
+  const [dateRange, setDateRange] = useState<CustomDateRange>({
+    from: new Date(),
+    to: new Date(),
   });
+  const [currentPeriod, setCurrentPeriod] = useState<DateRangeType>('today');
+
+  const handlePeriodChange = (period: DateRangeType, range: CustomDateRange) => {
+    setCurrentPeriod(period);
+    setDateRange(range);
+  };
 
   return (
     <AdminLayout title="Statistiques & Rapports" subtitle="Analysez les performances de votre boutique">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
-        <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} className="w-full sm:w-auto" />
+      {/* Period Selector with Exports */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />CSV</Button>
           <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />PDF</Button>
         </div>
+        <PeriodSelector onPeriodChange={handlePeriodChange} />
       </div>
 
       {/* Summary Cards */}

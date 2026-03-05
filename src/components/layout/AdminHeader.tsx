@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { mockNotifications } from "@/data/mockData";
+import { toast } from "sonner";
 
 interface AdminHeaderProps {
   title: string;
@@ -20,7 +22,18 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
+  const navigate = useNavigate();
   const unreadCount = mockNotifications.filter(n => !n.read).length;
+  
+  // Get current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    toast.success("Déconnexion réussie");
+    navigate("/login");
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 md:px-6 py-4">
@@ -89,18 +102,24 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
                   <User className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">Admin Principal</p>
-                  <p className="text-xs text-muted-foreground">Administrateur</p>
+                  <p className="text-sm font-medium">{currentUser.name || "Utilisateur"}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{currentUser.role === "admin" ? "Administrateur" : "Vendeur"}</p>
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profil</DropdownMenuItem>
-              <DropdownMenuItem>Paramètres</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <User className="w-4 h-4 mr-2" />
+                Profil
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Bell className="w-4 h-4 mr-2" />
+                Paramètres
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                 Déconnexion
               </DropdownMenuItem>
             </DropdownMenuContent>

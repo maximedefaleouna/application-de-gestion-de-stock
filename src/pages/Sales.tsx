@@ -15,12 +15,16 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { mockSales } from "@/data/mockData";
 import { Sale, SaleStatus } from "@/types";
-import { Search, Filter, MoreHorizontal, Eye, Printer, Trash2, Download, Clock, CreditCard, ShoppingCart } from "lucide-react";
+import { Search, Filter, MoreHorizontal, Eye, Printer, Trash2, Download, Clock, CreditCard, ShoppingCart, CheckCircle, XCircle, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import html2pdf from "html2pdf.js";
+import { toast } from "sonner";
 
 const statusConfig: Record<SaleStatus, { label: string; variant: "default" | "success" | "warning" | "info" | "destructive" | "pending" }> = {
   completed: { label: "Payé", variant: "success" },
@@ -52,36 +56,327 @@ export default function Sales() {
     return matchesSearch && matchesStatus;
   });
 
-  const generateReceipt = (sale: Sale) => {
-    const receiptContent = `
-═══════════════════════════════════
-       AUTOPIECES+ 
-       Reçu de vente
-═══════════════════════════════════
-N° : ${sale.id}
-Date : ${format(sale.createdAt, "dd/MM/yyyy HH:mm")}
-Vendeur : ${sale.seller}
-───────────────────────────────────
-${sale.items.map(item => `${item.productName}
-  ${item.quantity} x ${formatCFA(item.unitPrice)} = ${formatCFA(item.quantity * item.unitPrice)}`).join('\n')}
-───────────────────────────────────
-TOTAL : ${formatCFA(sale.totalAmount)}
-Payé  : ${formatCFA(sale.paidAmount)}
-${sale.remainingAmount > 0 ? `Reste  : ${formatCFA(sale.remainingAmount)}` : ''}
-Mode  : ${paymentLabels[sale.paymentMethod]}
-${sale.clientName ? `Client : ${sale.clientName}` : ''}
-${sale.clientPhone ? `Tél    : ${sale.clientPhone}` : ''}
-═══════════════════════════════════
-    Merci de votre confiance !
-═══════════════════════════════════`;
-
-    const blob = new Blob([receiptContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `recu-${sale.id}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const generateReceipt = async (sale: Sale, action: 'download' | 'print' = 'download') => {
+    try {
+      if (action === 'print') {
+        toast.info("Préparation de l'impression...");
+        
+        // Create receipt HTML with images - COMPACT & PROFESSIONAL
+        const receiptContent = `
+          <div id="receipt-content" style="padding: 15px; font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 15px; border-bottom: 3px solid #007bff; padding-bottom: 10px;">
+              <h1 style="font-size: 22px; margin: 0 0 5px 0; color: #007bff; font-weight: bold;">AUTOPIECES+</h1>
+              <p style="margin: 0; font-size: 14px; color: #666;">Reçu de vente</p>
+            </div>
+            
+            <!-- Info Section -->
+            <div style="margin-bottom: 15px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">N°:</span>
+                <span style="font-family: monospace; font-weight: bold; color: #333;">${sale.id}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">Date:</span>
+                <span style="color: #333;">${format(sale.createdAt, "dd/MM/yyyy à HH:mm")}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">Vendeur:</span>
+                <span style="color: #333;">${sale.seller}</span>
+              </div>
+              ${sale.clientName ? `
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">Client:</span>
+                <span style="color: #333;">${sale.clientName}</span>
+              </div>
+              ` : ''}
+            </div>
+            
+            <!-- Items Table -->
+            <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px;">
+              <thead>
+                <tr style="background: #007bff; color: white; font-weight: bold;">
+                  <th style="padding: 8px 6px; text-align: left; width: 45px;">Img</th>
+                  <th style="padding: 8px 6px; text-align: left;">Article</th>
+                  <th style="padding: 8px 6px; text-align: center;">Qté</th>
+                  <th style="padding: 8px 6px; text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sale.items.map((item) => `
+                  <tr style="border-bottom: 1px dashed #ddd;">
+                    <td style="padding: 6px;">
+                      ${item.imageUrl ? 
+                        `<img src="${item.imageUrl}" alt="" style="width: 35px; height: 35px; object-fit: cover; border-radius: 3px;" onerror="this.style.display='none'" />` : 
+                        '<div style="width: 35px; height: 35px; background: #f0f0f0; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 16px;">📦</div>'
+                      }
+                    </td>
+                    <td style="padding: 6px; font-weight: 500; color: #333;">
+                      <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.productName}</div>
+                    </td>
+                    <td style="padding: 6px; text-align: center; color: #666;">${item.quantity}</td>
+                    <td style="padding: 6px; text-align: right; font-weight: bold; color: #007bff;">${formatCFA(item.quantity * item.unitPrice)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            
+            <!-- Totals Section -->
+            <div style="border-top: 2px solid #007bff; padding-top: 10px; margin-top: 10px;">
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 16px; font-weight: bold;">
+                <span style="color: #333;">Total à payer:</span>
+                <span style="color: #007bff;">${formatCFA(sale.totalAmount)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 13px;">
+                <span style="color: #666;">Payé:</span>
+                <span style="color: #333; font-weight: 500;">${formatCFA(sale.paidAmount)}</span>
+              </div>
+              ${sale.remainingAmount > 0 ? `
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 13px;">
+                <span style="color: #666;">Reste:</span>
+                <span style="color: #ffc107; font-weight: 500;">${formatCFA(sale.remainingAmount)}</span>
+              </div>
+              ` : ''}
+              <div style="display: flex; justify-content: space-between; margin: 6px 0 4px 0; font-size: 12px;">
+                <span style="color: #666;">Paiement:</span>
+                <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; color: #333; text-transform: capitalize;">${paymentLabels[sale.paymentMethod]}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 12px;">
+                <span style="color: #666;">Statut:</span>
+                <span style="background: ${sale.status === 'completed' ? '#d4edda' : sale.status === 'credit' ? '#fff3cd' : '#d1ecf1'}; padding: 2px 6px; border-radius: 3px; color: ${sale.status === 'completed' ? '#155724' : sale.status === 'credit' ? '#856404' : '#0c5460'}; text-transform: capitalize;">${statusConfig[sale.status].label}</span>
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="text-align: center; margin-top: 15px; padding-top: 12px; border-top: 2px dashed #ccc;">
+              <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 600; color: #333;">Merci de votre confiance !</p>
+              <p style="margin: 0; font-size: 10px; color: #999;">Ce reçu fait office de facture et de garantie</p>
+            </div>
+          </div>
+        `;
+        
+        // Open print window in same tab
+        const printWindow = window.open('', '_self');
+        if (printWindow) {
+          // Replace content with receipt for printing
+          document.documentElement.innerHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Reçu ${sale.id}</title>
+              <style>
+                @media print {
+                  body { margin: 0; padding: 10px; }
+                  .no-print { display: none; }
+                  @page { margin: 1cm; }
+                }
+                body { 
+                  font-family: Arial, sans-serif; 
+                  background: white;
+                }
+                .actions-bar {
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  background: #f8f9fa;
+                  padding: 10px;
+                  border-bottom: 2px solid #dee2e6;
+                  display: flex;
+                  gap: 10px;
+                  justify-content: center;
+                  z-index: 1000;
+                }
+                .btn {
+                  padding: 8px 16px;
+                  border: none;
+                  border-radius: 5px;
+                  cursor: pointer;
+                  font-size: 14px;
+                  font-weight: 500;
+                  text-decoration: none;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 5px;
+                }
+                .btn-primary {
+                  background: #007bff;
+                  color: white;
+                }
+                .btn-secondary {
+                  background: #6c757d;
+                  color: white;
+                }
+                .btn:hover {
+                  opacity: 0.9;
+                }
+                .print-content {
+                  margin-top: 60px;
+                }
+                @media print {
+                  .actions-bar { display: none; }
+                  .print-content { margin-top: 0; }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="actions-bar no-print">
+                <button class="btn btn-primary" onclick="window.print()">
+                  🖨️ Imprimer
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='/sales'">
+                  ⬅️ Retour aux ventes
+                </button>
+              </div>
+              <div class="print-content">
+                ${receiptContent}
+              </div>
+              <script>
+                // Auto-print after a short delay
+                setTimeout(function() {
+                  window.print();
+                }, 500);
+              </script>
+            </body>
+            </html>
+          `;
+          document.close();
+        }
+      } else {
+        // Download as PDF
+        toast.info("Génération du PDF en cours...");
+        
+        // Create receipt HTML - COMPACT VERSION WITH IMAGES
+        const receiptContent = `
+          <div id="receipt-content" style="padding: 15px; font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 15px; border-bottom: 3px solid #007bff; padding-bottom: 10px;">
+              <h1 style="font-size: 22px; margin: 0 0 5px 0; color: #007bff; font-weight: bold;">AUTOPIECES+</h1>
+              <p style="margin: 0; font-size: 14px; color: #666;">Reçu de vente</p>
+            </div>
+            
+            <!-- Info Section -->
+            <div style="margin-bottom: 15px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">N°:</span>
+                <span style="font-family: monospace; font-weight: bold; color: #333;">${sale.id}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">Date:</span>
+                <span style="color: #333;">${format(sale.createdAt, "dd/MM/yyyy à HH:mm")}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">Vendeur:</span>
+                <span style="color: #333;">${sale.seller}</span>
+              </div>
+              ${sale.clientName ? `
+              <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                <span style="color: #666;">Client:</span>
+                <span style="color: #333;">${sale.clientName}</span>
+              </div>
+              ` : ''}
+            </div>
+            
+            <!-- Items Table -->
+            <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px;">
+              <thead>
+                <tr style="background: #007bff; color: white; font-weight: bold;">
+                  <th style="padding: 8px 6px; text-align: left; width: 45px;">Img</th>
+                  <th style="padding: 8px 6px; text-align: left;">Article</th>
+                  <th style="padding: 8px 6px; text-align: center;">Qté</th>
+                  <th style="padding: 8px 6px; text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sale.items.map((item) => `
+                  <tr style="border-bottom: 1px dashed #ddd;">
+                    <td style="padding: 6px;">
+                      ${item.imageUrl ? 
+                        `<img src="${item.imageUrl}" alt="" style="width: 35px; height: 35px; object-fit: cover; border-radius: 3px;" onerror="this.style.display='none'" />` : 
+                        '<div style="width: 35px; height: 35px; background: #f0f0f0; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 16px;">📦</div>'
+                      }
+                    </td>
+                    <td style="padding: 6px; font-weight: 500; color: #333;">
+                      <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.productName}</div>
+                    </td>
+                    <td style="padding: 6px; text-align: center; color: #666;">${item.quantity}</td>
+                    <td style="padding: 6px; text-align: right; font-weight: bold; color: #007bff;">${formatCFA(item.quantity * item.unitPrice)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            
+            <!-- Totals Section -->
+            <div style="border-top: 2px solid #007bff; padding-top: 10px; margin-top: 10px;">
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 16px; font-weight: bold;">
+                <span style="color: #333;">Total à payer:</span>
+                <span style="color: #007bff;">${formatCFA(sale.totalAmount)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 13px;">
+                <span style="color: #666;">Payé:</span>
+                <span style="color: #333; font-weight: 500;">${formatCFA(sale.paidAmount)}</span>
+              </div>
+              ${sale.remainingAmount > 0 ? `
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 13px;">
+                <span style="color: #666;">Reste:</span>
+                <span style="color: #ffc107; font-weight: 500;">${formatCFA(sale.remainingAmount)}</span>
+              </div>
+              ` : ''}
+              <div style="display: flex; justify-content: space-between; margin: 6px 0 4px 0; font-size: 12px;">
+                <span style="color: #666;">Paiement:</span>
+                <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; color: #333; text-transform: capitalize;">${paymentLabels[sale.paymentMethod]}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 12px;">
+                <span style="color: #666;">Statut:</span>
+                <span style="background: ${sale.status === 'completed' ? '#d4edda' : sale.status === 'credit' ? '#fff3cd' : '#d1ecf1'}; padding: 2px 6px; border-radius: 3px; color: ${sale.status === 'completed' ? '#155724' : sale.status === 'credit' ? '#856404' : '#0c5460'}; text-transform: capitalize;">${statusConfig[sale.status].label}</span>
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="text-align: center; margin-top: 15px; padding-top: 12px; border-top: 2px dashed #ccc;">
+              <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 600; color: #333;">Merci de votre confiance !</p>
+              <p style="margin: 0; font-size: 10px; color: #999;">Ce reçu fait office de facture et de garantie</p>
+            </div>
+          </div>
+        `;
+        
+        // Create temporary container
+        const container = document.createElement('div');
+        container.innerHTML = receiptContent;
+        document.body.appendChild(container);
+        
+        try {
+          // Generate PDF
+          await html2pdf().set({
+            margin: 0,
+            filename: `Recu_${sale.id}_${format(sale.createdAt, 'yyyy-MM-dd')}.pdf`,
+            image: { type: 'jpeg' as const, quality: 0.98 },
+            html2canvas: { 
+              scale: 2,
+              useCORS: true,
+              letterRendering: true,
+              allowTaint: false
+            },
+            jsPDF: { 
+              unit: 'mm', 
+              format: 'a4', 
+              orientation: 'portrait' as const
+            }
+          }).from(container).save();
+          
+          toast.success("PDF généré avec succès !");
+        } catch (error) {
+          console.error('Erreur lors de la génération PDF:', error);
+          toast.error("Erreur lors de la génération du PDF");
+        } finally {
+          // Remove temporary container
+          document.body.removeChild(container);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error("Une erreur est survenue");
+    }
   };
 
   return (
@@ -187,8 +482,11 @@ ${sale.clientPhone ? `Tél    : ${sale.clientPhone}` : ''}
                       <DropdownMenuItem onClick={() => setSelectedSale(sale)}>
                         <Eye className="w-4 h-4 mr-2" />Voir détails
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => generateReceipt(sale)}>
-                        <Printer className="w-4 h-4 mr-2" />Télécharger reçu
+                      <DropdownMenuItem onClick={() => generateReceipt(sale, 'download')}>
+                        <Download className="w-4 h-4 mr-2" />Télécharger PDF
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => generateReceipt(sale, 'print')}>
+                        <Printer className="w-4 h-4 mr-2" />Imprimer
                       </DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
                         <Trash2 className="w-4 h-4 mr-2" />Annuler
@@ -249,8 +547,11 @@ ${sale.clientPhone ? `Tél    : ${sale.clientPhone}` : ''}
                   <div className="flex justify-between"><span>Reste à payer</span><span className="font-bold text-warning">{formatCFA(selectedSale.remainingAmount)}</span></div>
                 )}
               </div>
-              <Button className="w-full" onClick={() => generateReceipt(selectedSale)}>
-                <Printer className="w-4 h-4 mr-2" />Télécharger le reçu
+              <Button className="w-full" onClick={() => generateReceipt(selectedSale, 'download')}>
+                <Download className="w-4 h-4 mr-2" />Télécharger le reçu (PDF)
+              </Button>
+              <Button variant="outline" className="w-full mt-2" onClick={() => generateReceipt(selectedSale, 'print')}>
+                <Printer className="w-4 h-4 mr-2" />Imprimer le reçu
               </Button>
             </div>
           )}
