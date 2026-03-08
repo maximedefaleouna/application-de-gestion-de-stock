@@ -97,7 +97,7 @@ export default function Clients() {
 
   const validatePhone = (value: string | undefined) => {
     if (!value) {
-      setPhoneError("Le num�ro de t�l�phone est requis");
+      setPhoneError("Le numéro de téléphone est requis");
       return false;
     }
 
@@ -128,7 +128,7 @@ export default function Clients() {
         email: formData.email || undefined,
         address: formData.address || undefined,
       });
-      toast.success("Client créé avec success");
+      toast.success("Client créé avec succès");
       setFormData({ name: "", email: "", address: "" });
       setPhone("+228");
       setIsAddDialogOpen(false);
@@ -137,7 +137,7 @@ export default function Clients() {
       toast.error(
         error.response?.data?.message ||
           error.response?.data?.error ||
-          "Erreur lors de la cr�ation du client",
+          "Erreur lors de la création du client",
       );
     }
   };
@@ -167,7 +167,7 @@ export default function Clients() {
             <p className="text-2xl font-bold text-foreground">
               {clientsAvecCredit}
             </p>
-            <p className="text-xs text-muted-foreground">Avec cr�dit</p>
+            <p className="text-xs text-muted-foreground">Avec crédit</p>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
@@ -178,7 +178,7 @@ export default function Clients() {
             <p className="text-2xl font-bold text-foreground">
               {formatCFA(totalCreditsEnCours)}
             </p>
-            <p className="text-xs text-muted-foreground">Cr�dits en cours</p>
+            <p className="text-xs text-muted-foreground">Crédits en cours</p>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
@@ -189,7 +189,7 @@ export default function Clients() {
             <p className="text-2xl font-bold text-foreground">
               {formatCFA(clients.reduce((acc, c) => acc + c.totalPaid, 0))}
             </p>
-            <p className="text-xs text-muted-foreground">Total recouvr�</p>
+            <p className="text-xs text-muted-foreground">Total recouvré</p>
           </div>
         </Card>
       </div>
@@ -198,7 +198,7 @@ export default function Clients() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher par nom ou t�l�phone..."
+            placeholder="Rechercher par nom ou téléphone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -233,7 +233,7 @@ export default function Clients() {
               </div>
               <div className="space-y-2">
                 <Label>
-                  T�l�phone <span className="text-destructive">*</span>
+                  Téléphone <span className="text-destructive">*</span>
                 </Label>
                 <PhoneInput
                   value={phone}
@@ -300,9 +300,9 @@ export default function Clients() {
             <TableRow className="bg-secondary/50">
               <TableHead>Client</TableHead>
               <TableHead>Contact</TableHead>
-              <TableHead>Total cr�dit</TableHead>
-              <TableHead>Pay�</TableHead>
-              <TableHead>Reste � payer</TableHead>
+              <TableHead>Total crédit</TableHead>
+              <TableHead>Payé</TableHead>
+              <TableHead>Reste à payer</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -369,11 +369,11 @@ export default function Clients() {
                   </TableCell>
                   <TableCell>
                     {remaining === 0 ? (
-                      <Badge variant="success">Sold�</Badge>
+                      <Badge variant="success">Soldé</Badge>
                     ) : remaining > 100000 ? (
-                      <Badge variant="destructive">Cr�dit �lev�</Badge>
+                      <Badge variant="destructive">Crédit élevé</Badge>
                     ) : (
-                      <Badge variant="warning">Cr�dit</Badge>
+                      <Badge variant="warning">Crédit</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -384,7 +384,7 @@ export default function Clients() {
                       asChild={false}
                     >
                       <Eye className="w-4 h-4 mr-1" />
-                      D�tails
+                      Détails
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -406,7 +406,7 @@ export default function Clients() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">T�l�phone</p>
+                  <p className="text-sm text-muted-foreground">Téléphone</p>
                   <p className="font-medium">{selectedClient.phone}</p>
                 </div>
                 <div>
@@ -416,13 +416,13 @@ export default function Clients() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <Card className="p-3 text-center">
-                  <p className="text-xs text-muted-foreground">Total cr�dit</p>
+                  <p className="text-xs text-muted-foreground">Total crédit</p>
                   <p className="text-lg font-bold">
                     {formatCFA(selectedClient.totalCredit)}
                   </p>
                 </Card>
                 <Card className="p-3 text-center">
-                  <p className="text-xs text-muted-foreground">Pay�</p>
+                  <p className="text-xs text-muted-foreground">Payé</p>
                   <p className="text-lg font-bold text-success">
                     {formatCFA(selectedClient.totalPaid)}
                   </p>
@@ -437,11 +437,11 @@ export default function Clients() {
                 </Card>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Ventes associ�es</h4>
+                <h4 className="font-semibold mb-2">Ventes associées</h4>
                 <div className="space-y-2">
                   {getClientSales(selectedClient.id).length === 0 ? (
                     <p className="text-sm text-muted-foreground">
-                      Aucune vente enregistr�e
+                      Aucune vente enregistrée
                     </p>
                   ) : (
                     getClientSales(selectedClient.id).map((sale: any) => (

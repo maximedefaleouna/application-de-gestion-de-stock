@@ -59,7 +59,7 @@ export function TopProducts() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground text-center py-8">Chargement...</p>
         ) : topProducts.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Aucune donnée disponible</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Aucune donnee disponible</p>
         ) : (
           topProducts.map((product, index) => {
             const maxCount = Math.max(...topProducts.map((p) => p.count));

@@ -66,9 +66,9 @@ export default function POS() {
       setProducts(productsRes.data || []);
       setClients(clientsRes.data || []);
     } catch (error) {
-      console.error("Erreur chargement donn�es POS:", error);
+      console.error("Erreur chargement données POS:", error);
       toast.error(
-        "Erreur de chargement des donn�es. Veuillez rafra�chir la page.",
+        "Erreur de chargement des données. Veuillez rafraîchir la page.",
       );
       setProducts([]);
       setClients([]);
@@ -152,11 +152,11 @@ export default function POS() {
       return;
     }
     if (!isCredit && paid < total) {
-      toast.error("Montant pay� insuffisant !");
+      toast.error("Montant payé insuffisant !");
       return;
     }
     if (isCredit && !selectedClientId) {
-      toast.error("S�lectionnez un client pour la vente � cr�dit !");
+      toast.error("Sélectionnez un client pour la vente à crédit !");
       return;
     }
     setIsReceiptOpen(true);
@@ -182,7 +182,7 @@ export default function POS() {
         isCredit,
       });
 
-      toast.success("Vente enregistr�e avec succ�s !");
+      toast.success("Vente enregistrée avec succès !");
       setCart([]);
       setPaidAmount("");
       setIsCredit(false);
@@ -229,7 +229,7 @@ export default function POS() {
     a.download = `recu-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Re�u t�l�charg� !");
+    toast.success("Reçu téléchargé !");
   };
 
   return (
@@ -239,7 +239,7 @@ export default function POS() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un produit par nom ou r�f�rence..."
+              placeholder="Rechercher un produit par nom ou référence..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -384,7 +384,7 @@ export default function POS() {
               <div className="flex items-center justify-between">
                 <Label className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
-                  Vente � cr�dit
+                  Vente à crédit
                 </Label>
                 <Switch checked={isCredit} onCheckedChange={setIsCredit} />
               </div>
@@ -400,7 +400,7 @@ export default function POS() {
                     onValueChange={setSelectedClientId}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="S�lectionner client" />
+                      <SelectValue placeholder="Sélectionner client" />
                     </SelectTrigger>
                     <SelectContent>
                       {clients.map((c) => (
@@ -420,7 +420,7 @@ export default function POS() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cash">Esp�ces</SelectItem>
+                    <SelectItem value="cash">Espèces</SelectItem>
                     <SelectItem value="mobile_money">Mobile Money</SelectItem>
                     <SelectItem value="card">Carte bancaire</SelectItem>
                   </SelectContent>
@@ -428,7 +428,7 @@ export default function POS() {
               </div>
 
               <div className="space-y-2">
-                <Label>Montant pay� (FCFA)</Label>
+                <Label>Montant payé (FCFA)</Label>
                 <Input
                   type="number"
                   value={paidAmount}
@@ -439,7 +439,7 @@ export default function POS() {
 
               {paid > 0 && remaining > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Reste � payer</span>
+                  <span className="text-muted-foreground">Reste à payer</span>
                   <span className="font-bold text-warning">
                     {formatCFA(remaining)}
                   </span>
@@ -463,7 +463,7 @@ export default function POS() {
       <Dialog open={isReceiptOpen} onOpenChange={setIsReceiptOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Vente confirm�e !</DialogTitle>
+            <DialogTitle>Vente confirmée !</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Card className="p-4 bg-secondary/30">
@@ -483,14 +483,14 @@ export default function POS() {
                   <span className="text-primary">{formatCFA(total)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Pay�</span>
+                  <span>Payé</span>
                   <span className="text-success">
                     {formatCFA(paid || total)}
                   </span>
                 </div>
                 {remaining > 0 && (
                   <div className="flex justify-between">
-                    <span>Reste (cr�dit)</span>
+                    <span>Reste (crédit)</span>
                     <span className="text-warning">{formatCFA(remaining)}</span>
                   </div>
                 )}
@@ -510,7 +510,7 @@ export default function POS() {
                 asChild={false}
               >
                 <Printer className="w-4 h-4 mr-2" />
-                T�l�charger re�u
+                Télécharger reçu
               </Button>
               <Button
                 className="flex-1 gradient-primary text-primary-foreground"

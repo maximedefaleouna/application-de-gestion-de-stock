@@ -12,10 +12,10 @@ const statusConfig: Record<
   SaleStatus,
   { label: string; variant: "default" | "success" | "warning" | "info" | "destructive" | "pending" }
 > = {
-  completed: { label: "Payé", variant: "success" },
-  credit: { label: "Crédit", variant: "warning" },
+  completed: { label: "Paye", variant: "success" },
+  credit: { label: "Credit", variant: "warning" },
   partial: { label: "Partiel", variant: "info" },
-  cancelled: { label: "Annulé", variant: "destructive" },
+  cancelled: { label: "Annule", variant: "destructive" },
 };
 
 const formatCFA = (amount: number) => amount.toLocaleString("fr-FR") + " F";
@@ -35,7 +35,7 @@ export function RecentSales() {
       const sales = (response.data || []).slice(0, 5);
       setRecentSales(sales);
     } catch (error) {
-      console.error("Erreur chargement ventes récentes:", error);
+      console.error("Erreur chargement ventes recentes:", error);
       setRecentSales([]);
     } finally {
       setIsLoading(false);
@@ -46,8 +46,8 @@ export function RecentSales() {
     <div className="bg-card rounded-xl border shadow-card p-5">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Ventes récentes</h3>
-          <p className="text-sm text-muted-foreground">Dernières transactions</p>
+          <h3 className="text-lg font-semibold text-foreground">Ventes recentes</h3>
+          <p className="text-sm text-muted-foreground">Dernieres transactions</p>
         </div>
         <Button variant="outline" size="sm">
           Voir tout
@@ -58,7 +58,7 @@ export function RecentSales() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground text-center py-8">Chargement...</p>
         ) : recentSales.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Aucune vente récente</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Aucune vente recente</p>
         ) : (
           recentSales.map((sale, index) => (
             <div
@@ -82,7 +82,7 @@ export function RecentSales() {
                   {sale.isCredit && (
                     <span className="flex items-center gap-1 text-warning">
                       <CreditCard className="w-3 h-3" />
-                      Crédit
+                      Credit
                     </span>
                   )}
                 </div>
@@ -102,9 +102,9 @@ export function RecentSales() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                  <DropdownMenuItem>Imprimer reçu</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">Annuler</DropdownMenuItem>
+                  <DropdownMenuItem inset={false}>Voir details</DropdownMenuItem>
+                  <DropdownMenuItem inset={false}>Imprimer reçu</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" inset={false}>Annuler</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

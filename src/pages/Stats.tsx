@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -115,7 +115,7 @@ export default function Stats() {
   const categoryData = useMemo(() => {
     const counts: Record<string, number> = {};
     products.forEach((p) => {
-      const key = p.category || "Non classé";
+      const key = p.category || "Non class�";
       counts[key] = (counts[key] || 0) + 1;
     });
     const total = products.length || 1;
@@ -222,7 +222,7 @@ export default function Stats() {
             </div>
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground">
-                Crédits en cours
+                Cr�dits en cours
               </p>
               <p className="text-lg md:text-2xl font-bold text-foreground truncate">
                 {formatCFA(dashboardStats.pendingCredits)}

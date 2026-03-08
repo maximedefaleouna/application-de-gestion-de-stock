@@ -1,4 +1,4 @@
-ï»¿import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
 
   const handleLogout = () => {
     authService.logout();
-    toast.success("DÃ©connexion rÃ©ussie");
+    toast.success("Dé©connexion ré©ussie");
     navigate("/login");
   };
 
@@ -124,7 +124,7 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
-                DÃ©connexion
+                Dé©connexion
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

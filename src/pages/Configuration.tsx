@@ -194,7 +194,7 @@ export default function Configuration() {
         {/* Aide et informations */}
         <Card className="bg-muted/50">
           <CardHeader>
-            <CardTitle className="text-base">💡 Le saviez-vous </CardTitle>
+            <CardTitle className="text-base">💡 Le saviez-vous</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>Ces informations seront utilisées pour :</p>

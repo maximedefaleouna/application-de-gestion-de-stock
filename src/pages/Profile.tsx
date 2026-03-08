@@ -209,7 +209,7 @@ export default function Profile() {
                     {currentUser.lastLogin
                       ? format(
                           new Date(currentUser.lastLogin),
-                          "dd MMMM yyyy à HH:mm",
+                          "dd MMMM yyyy �� HH:mm",
                           { locale: fr },
                         )
                       : "Aujourd'hui"}
@@ -284,7 +284,7 @@ export default function Profile() {
                   <Input
                     id="currentPassword"
                     type={showCurrentPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     value={passwordData.currentPassword}
                     onChange={(e) =>
                       setPasswordData({
@@ -354,7 +354,7 @@ export default function Profile() {
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     value={passwordData.confirmPassword}
                     onChange={(e) =>
                       setPasswordData({

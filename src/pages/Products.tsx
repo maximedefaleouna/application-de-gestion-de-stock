@@ -70,7 +70,7 @@ export default function Products() {
       setCategoryItems(items);
       setCategories(items.map((item) => item.name));
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors du chargement des catégories");
+      toast.error(error?.response?.data?.message || "Erreur lors du chargement des cat��gories");
       setCategoryItems([]);
       setCategories([]);
     }
@@ -128,11 +128,11 @@ export default function Products() {
 
   const handleAdd = async () => {
     if (!formData.name || !formData.reference) {
-      toast.error("Nom et référence obligatoires !");
+      toast.error("Nom et r��f��rence obligatoires !");
       return;
     }
     if (!formData.category) {
-      toast.error("Veuillez sélectionner une catégorie !");
+      toast.error("Veuillez selectionner une categorie !");
       return;
     }
 
@@ -171,7 +171,7 @@ export default function Products() {
       await produitService.create(payload);
       await loadProducts();
       setIsAddDialogOpen(false);
-      toast.success("Produit ajouté avec succès !");
+      toast.success("Produit ajouté avec succés !");
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Erreur lors de l'ajout du produit");
     }
@@ -199,7 +199,7 @@ export default function Products() {
       await loadProducts();
       setIsEditDialogOpen(false);
       setEditingProduct(null);
-      toast.success("Produit modifié avec succès !");
+      toast.success("Produit modifié avec succés !");
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Erreur lors de la modification du produit");
     }
@@ -227,7 +227,7 @@ export default function Products() {
       setNewCategory("");
       toast.success("Catégorie ajoutée !");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de l'ajout de la catégorie");
+      toast.error(error?.response?.data?.message || "Erreur lors de l'ajout de la cat��gorie");
     }
   };
 
@@ -242,7 +242,7 @@ export default function Products() {
       setEditingCategoryValue("");
       toast.success("Catégorie modifiée !");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de la modification de la catégorie");
+      toast.error(error?.response?.data?.message || "Erreur lors de la modification de la cat��gorie");
     }
   };
 
@@ -281,12 +281,12 @@ export default function Products() {
             )}
           </div>
           <div className="flex-1 space-y-2">
-            <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()}>
+            <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()} asChild={false}>
               <Upload className="w-4 h-4 mr-2" />
               Choisir une image
             </Button>
             {previewImage && (
-              <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => { setPreviewImage(""); setFormData(prev => ({ ...prev, imageUrl: "" })); }}>
+              <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => { setPreviewImage(""); setFormData(prev => ({ ...prev, imageUrl: "" })); } } asChild={false}>
                 <X className="w-4 h-4 mr-2" />
                 Retirer
               </Button>
@@ -315,6 +315,7 @@ export default function Products() {
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Description</Label>
+          <Textarea placeholder="Décrivez le produit, compatibilités, spécifications..." rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
           <Textarea placeholder="Décrivez le produit, compatibilités, spécifications..." rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
         </div>
       </div>
@@ -345,7 +346,7 @@ export default function Products() {
       {/* Section: Prix & Stock */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">₣</span>
+          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">â‚£</span>
           Prix & Stock
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -389,11 +390,11 @@ export default function Products() {
           </Select>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button className="gradient-primary text-primary-foreground shadow-glow" onClick={openAddDialog}>
+          <Button className="gradient-primary text-primary-foreground shadow-glow" onClick={openAddDialog} asChild={false}>
             <Plus className="w-4 h-4 mr-2" />
             Ajouter un produit
           </Button>
-          <Button variant="outline" onClick={() => setIsCategoryDialogOpen(true)}>
+          <Button variant="outline" onClick={() => setIsCategoryDialogOpen(true)} asChild={false}>
             <Tag className="w-4 h-4 mr-2" />
             Gérer catégories
           </Button>
@@ -403,7 +404,7 @@ export default function Products() {
       {/* Products count */}
       <div className="flex items-center gap-2 mb-4">
         <Package className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">{filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} trouvé{filteredProducts.length > 1 ? 's' : ''}</span>
+        <span className="text-sm text-muted-foreground">{filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} trouv{filteredProducts.length > 1 ? 's' : ''}.</span>
       </div>
 
       {/* Products Grid */}
@@ -430,10 +431,10 @@ export default function Products() {
                 )}
               </div>
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="secondary" size="icon" className="h-8 w-8 shadow-md" onClick={() => openEditDialog(product)}>
+                <Button variant="secondary" size="icon" className="h-8 w-8 shadow-md" onClick={() => openEditDialog(product)} asChild={false}>
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button variant="secondary" size="icon" className="h-8 w-8 shadow-md hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(product.id)}>
+                <Button variant="secondary" size="icon" className="h-8 w-8 shadow-md hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(product.id)} asChild={false}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -467,14 +468,14 @@ export default function Products() {
       {/* Add Product Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
          <DialogContent className="max-w-2xl max-h-[90vh]">
-          <DialogHeader>
+          <DialogHeader>    
             <DialogTitle className="flex items-center gap-2"><Plus className="w-5 h-5 text-primary" />Nouveau produit</DialogTitle>
             <DialogDescription>Ajoutez une pièce détachée au catalogue</DialogDescription>
           </DialogHeader>
           <ProductFormFields />
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Annuler</Button>
-            <Button className="gradient-primary text-primary-foreground" onClick={handleAdd}>Ajouter le produit</Button>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} asChild={false}>Annuler</Button>
+            <Button className="gradient-primary text-primary-foreground" onClick={handleAdd} asChild={false}>Ajouter le produit</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -488,8 +489,8 @@ export default function Products() {
           </DialogHeader>
           <ProductFormFields />
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Annuler</Button>
-            <Button className="gradient-primary text-primary-foreground" onClick={handleEdit}>Enregistrer</Button>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} asChild={false}>Annuler</Button>
+            <Button className="gradient-primary text-primary-foreground" onClick={handleEdit} asChild={false}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -510,7 +511,7 @@ export default function Products() {
                 onChange={(e) => setNewCategory(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addCategory()}
               />
-              <Button onClick={addCategory} className="gradient-primary text-primary-foreground shrink-0">
+              <Button onClick={addCategory} className="gradient-primary text-primary-foreground shrink-0" asChild={false}>
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
@@ -527,8 +528,8 @@ export default function Products() {
                         className="h-8 text-sm"
                         autoFocus
                       />
-                      <Button size="sm" variant="ghost" onClick={() => updateCategory(index)} className="shrink-0 h-8">OK</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingCategoryIndex(null)} className="shrink-0 h-8"><X className="w-3 h-3" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => updateCategory(index)} className="shrink-0 h-8" asChild={false}>OK</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingCategoryIndex(null)} className="shrink-0 h-8" asChild={false}><X className="w-3 h-3" /></Button>
                     </>
                   ) : (
                     <>
@@ -537,10 +538,10 @@ export default function Products() {
                       <Badge variant="secondary" className="text-[10px]">
                         {products.filter(p => p.category === cat).length}
                       </Badge>
-                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => { setEditingCategoryIndex(index); setEditingCategoryValue(cat); }}>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => { setEditingCategoryIndex(index); setEditingCategoryValue(cat); }} asChild={false}>
                         <Edit className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteCategory(index)}>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteCategory(index)} asChild={false}>
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </>

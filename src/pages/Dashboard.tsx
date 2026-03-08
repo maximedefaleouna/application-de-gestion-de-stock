@@ -193,7 +193,7 @@ export default function Dashboard() {
             </p>
           ) : lowStockProducts.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Tous les stocks sont suffisants ✓
+              Tous les stocks sont suffisants
             </p>
           ) : (
             <div className="space-y-3">

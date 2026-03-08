@@ -21,7 +21,7 @@ const navItems = [
   { title: "Point de vente", url: "/sales", icon: ShoppingCart },
   { title: "Produits", url: "/products", icon: Package },
   { title: "Stock", url: "/stock", icon: Warehouse },
-  { title: "Clients & Crédits", url: "/clients", icon: CreditCard },
+  { title: "Clients & Credits", url: "/clients", icon: CreditCard },
   { title: "Utilisateurs", url: "/users", icon: Users },
   { title: "Alertes", url: "/notifications", icon: Bell },
   { title: "Statistiques", url: "/stats", icon: BarChart3 },
@@ -41,7 +41,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
-    toast.success("Déconnexion réussie");
+    toast.success("D��connexion r��ussie");
     navigate("/login");
   };
 
@@ -52,7 +52,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
           <Wrench className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-sidebar-foreground">Pièces Shop</h1>
+          <h1 className="text-lg font-bold text-sidebar-foreground">Pi��ces Shop</h1>
           <p className="text-xs text-sidebar-muted">Gestion Boutique</p>
         </div>
       </div>
@@ -109,7 +109,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-muted hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
         >
           <LogOut className="w-5 h-5" />
-          <span>Déconnexion</span>
+          <span>D��connexion</span>
         </button>
       </div>
     </aside>

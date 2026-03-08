@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -46,7 +46,7 @@ export default function Receipt() {
       toast.info("Génération du PDF en cours...");
 
       if (!receiptRef.current) {
-        toast.error("Erreur: élément de reçu non trouvé");
+        toast.error("Erreur: Élément de reçu non trouvé");
         return;
       }
 

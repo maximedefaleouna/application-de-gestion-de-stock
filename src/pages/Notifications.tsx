@@ -75,7 +75,7 @@ export default function Notifications() {
     try {
       await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      toast.success("Toutes les notifications ont �t� marqu�es comme lues");
+      toast.success("Toutes les notifications ont été marquées comme lues");
     } catch {
       toast.error("Impossible de marquer toutes les notifications comme lues");
     }
@@ -85,7 +85,7 @@ export default function Notifications() {
     try {
       await notificationService.delete(id);
       setNotifications((prev) => prev.filter((n) => n.id !== id));
-      toast.success("Notification supprim�e");
+      toast.success("Notification supprimée");
     } catch {
       toast.error("Impossible de supprimer la notification");
     }
@@ -102,7 +102,7 @@ export default function Notifications() {
   return (
     <AdminLayout
       title="Alertes & Notifications"
-      subtitle="Restez inform� des �v�nements importants"
+      subtitle="Restez informé des événements importants"
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {Object.entries(typeConfig).map(([type, config]) => {
@@ -122,8 +122,8 @@ export default function Notifications() {
                     : type === "stock"
                       ? "Stock"
                       : type === "credit"
-                        ? "Cr�dits"
-                        : "Syst�me"}
+                        ? "Crédits"
+                        : "Système"}
                 </p>
               </div>
             </Card>
@@ -157,9 +157,9 @@ export default function Notifications() {
           <TabsTrigger value="all">Toutes</TabsTrigger>
           <TabsTrigger value="unread">Non lues</TabsTrigger>
           <TabsTrigger value="stock">Stock</TabsTrigger>
-          <TabsTrigger value="credit">Cr�dits</TabsTrigger>
+          <TabsTrigger value="credit">Crédits</TabsTrigger>
           <TabsTrigger value="sale">Ventes</TabsTrigger>
-          <TabsTrigger value="system">Syst�me</TabsTrigger>
+          <TabsTrigger value="system">Système</TabsTrigger>
         </TabsList>
       </Tabs>
 

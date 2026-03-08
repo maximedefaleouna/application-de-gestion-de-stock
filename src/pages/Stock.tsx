@@ -109,7 +109,7 @@ export default function Stock() {
         quantity: Number(movementData.quantity),
         reason: movementData.reason,
       });
-      toast.success("Mouvement enregistr�");
+      toast.success("Mouvement enregistré");
       setIsMovementDialogOpen(false);
       setMovementData({ type: "in", productId: "", quantity: "", reason: "" });
       await loadData();
@@ -117,7 +117,7 @@ export default function Stock() {
       toast.error(
         error.response?.data?.message ||
           error.response?.data?.error ||
-          "Erreur lors de la cr�ation du mouvement",
+          "Erreur lors de la création du mouvement",
       );
     }
   };
@@ -136,7 +136,7 @@ export default function Stock() {
             <p className="text-2xl font-bold text-foreground">
               {products.length}
             </p>
-            <p className="text-xs text-muted-foreground">R�f�rences</p>
+            <p className="text-xs text-muted-foreground">Références</p>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
@@ -199,8 +199,8 @@ export default function Stock() {
           <TableHeader>
             <TableRow className="bg-secondary/50">
               <TableHead>Produit</TableHead>
-              <TableHead>R�f�rence</TableHead>
-              <TableHead>Cat�gorie</TableHead>
+              <TableHead>Référence</TableHead>
+              <TableHead>Catégorie</TableHead>
               <TableHead className="text-center">Stock</TableHead>
               <TableHead className="text-center">Seuil</TableHead>
               <TableHead>Valeur</TableHead>
@@ -337,7 +337,7 @@ export default function Stock() {
                   <SelectValue placeholder="Choisir" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="in">Entr�e (r�ception)</SelectItem>
+                  <SelectItem value="in">Entrée (réception)</SelectItem>
                   <SelectItem value="out">Sortie (autre que vente)</SelectItem>
                   <SelectItem value="adjustment">
                     Ajustement (inventaire)
@@ -354,7 +354,7 @@ export default function Stock() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="S�lectionner un produit" />
+                  <SelectValue placeholder="Sélectionner un produit" />
                 </SelectTrigger>
                 <SelectContent>
                   {products.map((p) => (
@@ -366,7 +366,7 @@ export default function Stock() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Quantit�</Label>
+              <Label>Quantité</Label>
               <Input
                 type="number"
                 placeholder="0"
@@ -382,7 +382,7 @@ export default function Stock() {
             <div className="space-y-2">
               <Label>Raison</Label>
               <Input
-                placeholder="Ex: R�approvisionnement fournisseur"
+                placeholder="Ex: Réapprovisionnement fournisseur"
                 value={movementData.reason}
                 onChange={(e) =>
                   setMovementData((prev) => ({

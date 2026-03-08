@@ -65,7 +65,7 @@ const statusConfig: Record<
   completed: { label: "Payé", variant: "success" },
   credit: { label: "Crédit", variant: "warning" },
   partial: { label: "Partiel", variant: "info" },
-  cancelled: { label: "Annul�", variant: "destructive" },
+  cancelled: { label: "Annulé", variant: "destructive" },
 };
 
 const formatCFA = (amount: number) => amount.toLocaleString("fr-FR") + " F";
@@ -102,7 +102,7 @@ export default function Sales() {
   const handleDelete = async (id: string) => {
     try {
       await venteService.delete(id);
-      toast.success("Vente supprim�e");
+      toast.success("Vente supprimée");
       await loadSales();
     } catch (error: any) {
       toast.error(
@@ -131,14 +131,14 @@ export default function Sales() {
   return (
     <AdminLayout
       title="Historique des ventes"
-      subtitle="Consultez et g�rez toutes les ventes"
+      subtitle="Consultez et gérez toutes les ventes"
     >
       <div className="bg-card rounded-xl border shadow-card p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par client ou N� vente..."
+              placeholder="Rechercher par client ou N° vente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -154,7 +154,7 @@ export default function Sales() {
               <SelectItem value="completed">Payé</SelectItem>
               <SelectItem value="credit">Crédit</SelectItem>
               <SelectItem value="partial">Partiel</SelectItem>
-              <SelectItem value="cancelled">Annul�</SelectItem>
+              <SelectItem value="cancelled">Annulé</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -172,11 +172,11 @@ export default function Sales() {
         <Table>
           <TableHeader>
             <TableRow className="bg-secondary/50">
-              <TableHead>N� Vente</TableHead>
+              <TableHead>N° Vente</TableHead>
               <TableHead>Client</TableHead>
               <TableHead>Articles</TableHead>
               <TableHead>Montant</TableHead>
-              <TableHead>Pay�</TableHead>
+              <TableHead>Payé</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -198,7 +198,7 @@ export default function Sales() {
                   colSpan={8}
                   className="text-center text-muted-foreground py-8"
                 >
-                  Aucune vente trouv�e
+                  Aucune vente trouvée
                 </TableCell>
               </TableRow>
             ) : (
@@ -280,7 +280,7 @@ export default function Sales() {
                           inset={false}
                         >
                           <Eye className="w-4 h-4 mr-2" />
-                          Voir d�tails
+                          Voir détails
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => openReceiptAction(sale.id, "print")}
@@ -317,9 +317,9 @@ export default function Sales() {
       <Dialog open={!!selectedSale} onOpenChange={() => setSelectedSale(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>D�tails vente {selectedSale?.id}</DialogTitle>
+            <DialogTitle>Détails vente {selectedSale?.id}</DialogTitle>
             <DialogDescription>
-              Informations compl�tes de la vente
+              Informations complètes de la vente
             </DialogDescription>
           </DialogHeader>
           {selectedSale && (

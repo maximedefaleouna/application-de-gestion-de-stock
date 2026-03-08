@@ -48,7 +48,7 @@ export function RevenueChart() {
     <div className="bg-card rounded-xl border shadow-card p-5">
       <div className="mb-5">
         <h3 className="text-lg font-semibold text-foreground">Revenus de la semaine</h3>
-        <p className="text-sm text-muted-foreground">Évolution des ventes sur 7 jours</p>
+        <p className="text-sm text-muted-foreground">Ã‰volution des ventes sur 7 jours</p>
       </div>
 
       <div className="h-[280px]">
