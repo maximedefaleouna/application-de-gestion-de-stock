@@ -1,14 +1,54 @@
+import { useEffect, useMemo, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { weeklyRevenueData } from "@/data/mockData";
+import { venteService } from "@/services/api.service";
 
 const formatCFA = (value: number) => (value / 1000) + 'k';
 
 export function RevenueChart() {
+  const [sales, setSales] = useState<any[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await venteService.getAll();
+        setSales(response.data || []);
+      } catch {
+        setSales([]);
+      }
+    };
+    load();
+  }, []);
+
+  const weeklyRevenueData = useMemo(() => {
+    const dayLabels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+    const now = new Date();
+    const days: { day: string; revenue: number; sales: number; dateKey: string }[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const day = dayLabels[(d.getDay() + 6) % 7];
+      const dateKey = d.toISOString().slice(0, 10);
+      days.push({ day, revenue: 0, sales: 0, dateKey });
+    }
+
+    sales.forEach((sale) => {
+      const key = new Date(sale.createdAt).toISOString().slice(0, 10);
+      const match = days.find((d) => d.dateKey === key);
+      if (match) {
+        match.revenue += Number(sale.totalAmount || 0);
+        match.sales += 1;
+      }
+    });
+
+    return days.map(({ dateKey, ...rest }) => rest);
+  }, [sales]);
+
   return (
     <div className="bg-card rounded-xl border shadow-card p-5">
       <div className="mb-5">
         <h3 className="text-lg font-semibold text-foreground">Revenus de la semaine</h3>
-        <p className="text-sm text-muted-foreground">Ã‰volution des ventes sur 7 jours</p>
+        <p className="text-sm text-muted-foreground">Évolution des ventes sur 7 jours</p>
       </div>
 
       <div className="h-[280px]">
@@ -21,13 +61,13 @@ export function RevenueChart() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis 
-              dataKey="day" 
+            <XAxis
+              dataKey="day"
               axisLine={false}
               tickLine={false}
               tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}

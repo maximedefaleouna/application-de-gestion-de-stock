@@ -6,9 +6,9 @@ interface StatCardProps {
   title: string;
   value: string | number;
   icon: ReactNode;
-  trend?: number;
-  trendLabel?: string;
-  variant?: "default" | "primary" | "success" | "warning" | "destructive";
+  trend: number;
+  trendLabel: string;
+  variant: "default" | "primary" | "success" | "warning" | "destructive";
 }
 
 const variantStyles = {

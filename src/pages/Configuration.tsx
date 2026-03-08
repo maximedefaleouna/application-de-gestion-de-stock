@@ -1,12 +1,26 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Save, Building2, User, Mail, Phone, MapPin, Store } from "lucide-react";
+import {
+  Save,
+  Building2,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Store,
+} from "lucide-react";
 
 export default function Configuration() {
   // Mock data - pas de connexion API
@@ -16,7 +30,7 @@ export default function Configuration() {
     prenomChef: "Jean",
     adresse: "123 Avenue du Commerce",
     telephone: "0612345678",
-    email: "contact@boutique.com"
+    email: "contact@boutique.com",
   });
 
   const handleSave = () => {
@@ -26,12 +40,12 @@ export default function Configuration() {
   };
 
   const handleChange = (field: string, value: string) => {
-    setConfig(prev => ({ ...prev, [field]: value }));
+    setConfig((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
-    <AdminLayout 
-      title="Configuration de la boutique" 
+    <AdminLayout
+      title="Configuration de la boutique"
       subtitle="Gérez les informations de votre établissement"
     >
       <div className="max-w-4xl mx-auto space-y-6">
@@ -57,7 +71,7 @@ export default function Configuration() {
                   <Input
                     id="nom"
                     value={config.nom}
-                    onChange={(e) => handleChange('nom', e.target.value)}
+                    onChange={(e) => handleChange("nom", e.target.value)}
                     className="pl-9"
                     placeholder="Ex: Ma Boutique"
                   />
@@ -71,7 +85,7 @@ export default function Configuration() {
                   <Input
                     id="adresse"
                     value={config.adresse}
-                    onChange={(e) => handleChange('adresse', e.target.value)}
+                    onChange={(e) => handleChange("adresse", e.target.value)}
                     className="pl-9"
                     placeholder="Ex: 123 Rue du Commerce"
                   />
@@ -87,7 +101,7 @@ export default function Configuration() {
                   <Input
                     id="telephone"
                     value={config.telephone}
-                    onChange={(e) => handleChange('telephone', e.target.value)}
+                    onChange={(e) => handleChange("telephone", e.target.value)}
                     className="pl-9"
                     placeholder="Ex: 0612345678"
                     type="tel"
@@ -102,7 +116,7 @@ export default function Configuration() {
                   <Input
                     id="email"
                     value={config.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
+                    onChange={(e) => handleChange("email", e.target.value)}
                     className="pl-9"
                     placeholder="Ex: contact@boutique.com"
                     type="email"
@@ -133,7 +147,7 @@ export default function Configuration() {
                 <Input
                   id="nomChef"
                   value={config.nomChef}
-                  onChange={(e) => handleChange('nomChef', e.target.value)}
+                  onChange={(e) => handleChange("nomChef", e.target.value)}
                   placeholder="Ex: Dupont"
                 />
               </div>
@@ -143,7 +157,7 @@ export default function Configuration() {
                 <Input
                   id="prenomChef"
                   value={config.prenomChef}
-                  onChange={(e) => handleChange('prenomChef', e.target.value)}
+                  onChange={(e) => handleChange("prenomChef", e.target.value)}
                   placeholder="Ex: Jean"
                 />
               </div>
@@ -153,21 +167,25 @@ export default function Configuration() {
 
         {/* Boutons d'action */}
         <div className="flex flex-col sm:flex-row gap-3 justify-end border-t pt-6">
-          <Button variant="outline" onClick={() => {
-            setConfig({
-              nom: "Ma Boutique",
-              nomChef: "Dupont",
-              prenomChef: "Jean",
-              adresse: "123 Avenue du Commerce",
-              telephone: "0612345678",
-              email: "contact@boutique.com"
-            });
-            toast.info("Configuration réinitialisée");
-          }}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setConfig({
+                nom: "Ma Boutique",
+                nomChef: "Dupont",
+                prenomChef: "Jean",
+                adresse: "123 Avenue du Commerce",
+                telephone: "0612345678",
+                email: "contact@boutique.com",
+              });
+              toast.info("Configuration réinitialisée");
+            }}
+            asChild={false}
+          >
             Réinitialiser
           </Button>
-          
-          <Button onClick={handleSave} className="gap-2">
+
+          <Button onClick={handleSave} className="gap-2" asChild={false}>
             <Save className="w-4 h-4" />
             Enregistrer la configuration
           </Button>
@@ -176,12 +194,10 @@ export default function Configuration() {
         {/* Aide et informations */}
         <Card className="bg-muted/50">
           <CardHeader>
-            <CardTitle className="text-base">💡 Le saviez-vous ?</CardTitle>
+            <CardTitle className="text-base">💡 Le saviez-vous </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>
-              Ces informations seront utilisées pour :
-            </p>
+            <p>Ces informations seront utilisées pour :</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li>Personnaliser vos documents commerciaux (factures, reçus)</li>
               <li>Afficher les coordonnées dans les notifications</li>
@@ -190,7 +206,8 @@ export default function Configuration() {
             </ul>
             <Separator className="my-3" />
             <p className="text-xs italic">
-              Note: Cette page est une maquette. La sauvegarde n'est pas connectée à l'API.
+              Note: Cette page est une maquette. La sauvegarde n'est pas
+              connectée à l'API.
             </p>
           </CardContent>
         </Card>

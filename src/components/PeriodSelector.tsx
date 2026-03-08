@@ -1,37 +1,28 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
+import { DateRange as DayPickerDateRange } from "react-day-picker";
 
-export type DateRangeType = 'today' | 'yesterday' | 'last7days' | 'last30days' | 'custom' | 'specific';
+export type DateRangeType = "today" | "yesterday" | "last7days" | "last30days" | "custom" | "specific";
 
 interface DateRange {
   from: Date | undefined;
-  to?: Date | undefined;
+  to: Date | undefined;
 }
 
 interface PeriodSelectorProps {
-  onPeriodChange?: (period: DateRangeType, range: DateRange) => void;
+  onPeriodChange: (period: DateRangeType, range: DateRange) => void;
   className?: string;
 }
 
 export function PeriodSelector({ onPeriodChange, className }: PeriodSelectorProps) {
-  const [period, setPeriod] = useState<DateRangeType>('today');
+  const [period, setPeriod] = useState<DateRangeType>("today");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay(new Date()),
@@ -44,85 +35,76 @@ export function PeriodSelector({ onPeriodChange, className }: PeriodSelectorProp
     let newRange: DateRange = { from: undefined, to: undefined };
 
     switch (value) {
-      case 'today':
-        newRange = {
-          from: startOfDay(new Date()),
-          to: endOfDay(new Date()),
-        };
+      case "today":
+        newRange = { from: startOfDay(new Date()), to: endOfDay(new Date()) };
         break;
-      case 'yesterday':
+      case "yesterday": {
         const yesterday = subDays(new Date(), 1);
-        newRange = {
-          from: startOfDay(yesterday),
-          to: endOfDay(yesterday),
-        };
+        newRange = { from: startOfDay(yesterday), to: endOfDay(yesterday) };
         break;
-      case 'last7days':
-        newRange = {
-          from: startOfDay(subDays(new Date(), 6)),
-          to: endOfDay(new Date()),
-        };
+      }
+      case "last7days":
+        newRange = { from: startOfDay(subDays(new Date(), 6)), to: endOfDay(new Date()) };
         break;
-      case 'last30days':
-        newRange = {
-          from: startOfDay(subDays(new Date(), 29)),
-          to: endOfDay(new Date()),
-        };
+      case "last30days":
+        newRange = { from: startOfDay(subDays(new Date(), 29)), to: endOfDay(new Date()) };
         break;
-      case 'specific':
+      case "specific":
         newRange = {
           from: selectedDate ? startOfDay(selectedDate) : undefined,
           to: selectedDate ? endOfDay(selectedDate) : undefined,
         };
         break;
-      case 'custom':
-        // Will be set via calendar
+      case "custom":
         break;
     }
 
     setDateRange(newRange);
-    onPeriodChange?.(value, newRange);
+    onPeriodChange(value, newRange);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
-    if (period === 'specific') {
+    if (period === "specific") {
       const newRange = {
         from: date ? startOfDay(date) : undefined,
         to: date ? endOfDay(date) : undefined,
       };
       setDateRange(newRange);
-      onPeriodChange?.('specific', newRange);
+      onPeriodChange("specific", newRange);
     }
   };
 
-  const handleRangeSelect = (range: DateRange | undefined) => {
-    if (range) {
-      setDateRange(range);
-      setPeriod('custom');
-      onPeriodChange?.('custom', range);
-    }
+  const handleRangeSelect = (range: DayPickerDateRange | undefined) => {
+    if (!range) return;
+    const normalized: DateRange = {
+      from: range.from,
+      to: range.to,
+    };
+    setDateRange(normalized);
+    setPeriod("custom");
+    onPeriodChange("custom", normalized);
   };
 
   const getPeriodLabel = () => {
     switch (period) {
-      case 'today':
+      case "today":
         return "Aujourd'hui";
-      case 'yesterday':
-        return 'Hier';
-      case 'last7days':
-        return '7 derniers jours';
-      case 'last30days':
-        return '30 derniers jours';
-      case 'specific':
-        return selectedDate ? format(selectedDate, 'dd MMMM yyyy', { locale: fr }) : 'Date spécifique';
-      case 'custom':
+      case "yesterday":
+        return "Hier";
+      case "last7days":
+        return "7 derniers jours";
+      case "last30days":
+        return "30 derniers jours";
+      case "specific":
+        return selectedDate ? format(selectedDate, "dd MMMM yyyy", { locale: fr }) : "Date spécifique";
+      case "custom":
         if (dateRange.from && dateRange.to) {
-          return `${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}`;
+          return `${format(dateRange.from, "dd/MM/yyyy")} - ${format(dateRange.to, "dd/MM/yyyy")}`;
         }
-        return 'Période personnalisée';
+        return "Période personnalisée";
       default:
-        return 'Période';
+        return "Période";
     }
   };
 
@@ -136,7 +118,6 @@ export function PeriodSelector({ onPeriodChange, className }: PeriodSelectorProp
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {/* Quick presets */}
           <Select value={period} onValueChange={handlePeriodChange}>
             <SelectTrigger className="w-[180px] h-9 text-sm">
               <SelectValue placeholder="Sélectionner une période" />
@@ -151,63 +132,24 @@ export function PeriodSelector({ onPeriodChange, className }: PeriodSelectorProp
             </SelectContent>
           </Select>
 
-          {/* Date picker for specific date or custom range */}
-          {(period === 'specific' || period === 'custom') && (
+          {(period === "specific" || period === "custom") && (
             <Popover open={isOpen} onOpenChange={setIsOpen}>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "h-9 text-sm",
-                    !dateRange.from && "text-muted-foreground"
-                  )}
-                >
+                <Button variant="outline" size="sm" className={cn("h-9 text-sm", !dateRange.from && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {period === 'custom' ? 'Choisir dates' : 'Choisir date'}
+                  {period === "custom" ? "Choisir dates" : "Choisir date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                {period === 'custom' ? (
+                {period === "custom" ? (
                   <Calendar
                     initialFocus
                     mode="range"
                     defaultMonth={dateRange.from}
-                    selected={dateRange}
+                    selected={{ from: dateRange.from, to: dateRange.to }}
                     onSelect={handleRangeSelect}
                     numberOfMonths={2}
                     locale={fr}
-                    classNames={{
-                      months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                      month: "space-y-4",
-                      caption: "flex justify-center pt-1 relative items-center",
-                      caption_label: "text-sm font-medium",
-                      nav: "space-x-1 flex items-center",
-                      nav_button: cn(
-                        "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-                      ),
-                      nav_button_previous: "absolute left-1",
-                      nav_button_next: "absolute right-1",
-                      table: "w-full border-collapse space-y-1",
-                      head_row: "flex",
-                      head_cell:
-                        "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-                      row: "flex w-full mt-2",
-                      cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                      day: cn(
-                        "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                      ),
-                      day_range_end: "day-range-end",
-                      day_selected:
-                        "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                      day_today: "bg-accent text-accent-foreground",
-                      day_outside:
-                        "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-                      day_disabled: "text-muted-foreground opacity-50",
-                      day_range_middle:
-                        "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                      day_hidden: "invisible",
-                    }}
                   />
                 ) : (
                   <Calendar

@@ -72,7 +72,7 @@ export const mockProducts: Product[] = [
     stock: 12,
     minStock: 4,
     imageUrl:
-      "https://batterie24.de/media/b4/53/9c/1753691288/12520-02-jpg.jpg?ts=1754562252",
+      "https://batterie24.de/media/b4/53/9c/1753691288/12520-02-jpg.jpgts=1754562252",
     available: true,
   },
   {
@@ -120,7 +120,7 @@ export const mockProducts: Product[] = [
     stock: 2,
     minStock: 4,
     imageUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmmJAyDAl1MQySGF4Cwk3hqcddQh6TBTu_Kg&s",
+      "https://encrypted-tbn0.gstatic.com/imagesq=tbn:ANd9GcRmmJAyDAl1MQySGF4Cwk3hqcddQh6TBTu_Kg&s",
     available: true,
   },
   {
@@ -136,7 +136,7 @@ export const mockProducts: Product[] = [
     stock: 18,
     minStock: 8,
     imageUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOoqdrFWwuYIu5OregXpMPYxrxoZJl4z26bA&s",
+      "https://encrypted-tbn0.gstatic.com/imagesq=tbn:ANd9GcTOoqdrFWwuYIu5OregXpMPYxrxoZJl4z26bA&s",
     available: true,
   },
 ];
@@ -229,7 +229,7 @@ export const mockSales: Sale[] = [
         productName: "Batterie 12V 60Ah",
         quantity: 1,
         unitPrice: 55000,
-        imageUrl: "https://batterie24.de/media/b4/53/9c/1753691288/12520-02-jpg.jpg?ts=1754562252",
+        imageUrl: "https://batterie24.de/media/b4/53/9c/1753691288/12520-02-jpg.jpgts=1754562252",
       },
     ],
     totalAmount: 55000,
@@ -260,7 +260,7 @@ export const mockSales: Sale[] = [
         productName: "Huile moteur 5W30 5L",
         quantity: 2,
         unitPrice: 25000,
-        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOoqdrFWwuYIu5OregXpMPYxrxoZJl4z26bA&s",
+        imageUrl: "https://encrypted-tbn0.gstatic.com/imagesq=tbn:ANd9GcTOoqdrFWwuYIu5OregXpMPYxrxoZJl4z26bA&s",
       },
     ],
     totalAmount: 88000,
@@ -312,7 +312,7 @@ export const mockSales: Sale[] = [
         productName: "Roulement de roue avant",
         quantity: 2,
         unitPrice: 22000,
-        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmmJAyDAl1MQySGF4Cwk3hqcddQh6TBTu_Kg&s",
+        imageUrl: "https://encrypted-tbn0.gstatic.com/imagesq=tbn:ANd9GcRmmJAyDAl1MQySGF4Cwk3hqcddQh6TBTu_Kg&s",
       },
     ],
     totalAmount: 108000,

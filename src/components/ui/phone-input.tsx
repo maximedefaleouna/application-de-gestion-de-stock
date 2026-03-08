@@ -26,8 +26,8 @@ type PhoneInputProps = Omit<
   "onChange" | "value" | "ref"
 > &
   Omit<RPNInput.Props<typeof RPNInput.default>, "onChange"> & {
-    onChange?: (value: RPNInput.Value) => void;
-    error?: boolean;
+    onChange: (value: RPNInput.Value) => void;
+    error: boolean;
   };
 
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
@@ -51,7 +51,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
            *
            * @param {E164Number | undefined} value - The entered value
            */
-          onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+          onChange={(value) => onChange(value || ("" as RPNInput.Value))}
           {...props}
         />
       );
@@ -74,7 +74,7 @@ InputComponent.displayName = "InputComponent";
 type CountryEntry = { label: string; value: RPNInput.Country | undefined };
 
 type CountrySelectProps = {
-  disabled?: boolean;
+  disabled: boolean;
   value: RPNInput.Country;
   options: CountryEntry[];
   onChange: (country: RPNInput.Country) => void;
@@ -110,7 +110,7 @@ const CountrySelect = ({
             country={selectedCountry}
             countryName={selectedCountry}
           />
-          <ChevronsUpDown
+              <ChevronsUpDown
             className={cn(
               "-mr-2 size-4 opacity-50",
               disabled ? "hidden" : "opacity-100",

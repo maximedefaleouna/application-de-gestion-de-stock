@@ -1,15 +1,24 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShieldCheck, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ShieldCheck, Mail, Lock, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useApp();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -24,10 +33,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Simulate API call - Replace with actual authentication
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Mock validation
+      // Validation basique avant envoi
       if (!formData.email || !formData.password) {
         throw new Error("Veuillez remplir tous les champs");
       }
@@ -40,24 +46,47 @@ export default function Login() {
         throw new Error("Le mot de passe doit contenir au moins 6 caractères");
       }
 
-      // Mock successful login
-      toast.success("Connexion réussie !");
-      
-      // Store auth token (mock)
-      localStorage.setItem("authToken", "mock-jwt-token-" + Date.now());
-      localStorage.setItem("user", JSON.stringify({
-        id: "1",
-        name: "Admin Principal",
-        email: formData.email,
-        role: "admin" as "admin" | "seller",
-      }));
+      // Appel réel à l'API via le contexte
+      await login(formData.email, formData.password);
 
-      // Redirect to dashboard
+      toast.success("Connexion réussie !", {
+        duration: 3000,
+      });
+
       navigate("/dashboard");
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erreur de connexion";
+    } catch (err: any) {
+      // Gestion détaillée des erreurs
+      let errorMessage = "Erreur de connexion";
+
+      if (err.response) {
+        const status = err.response.status;
+        const message = err.response.data.message || err.response.data.error;
+
+        switch (status) {
+          case 401:
+            errorMessage = message || "Email ou mot de passe incorrect";
+            break;
+          case 403:
+            errorMessage = "Compte désactivé. Contactez un administrateur.";
+            break;
+          case 400:
+            errorMessage = message || "Données invalides";
+            break;
+          default:
+            errorMessage = message || "Erreur serveur. Veuillez réessayer.";
+        }
+      } else if (err.request) {
+        errorMessage =
+          "Impossible de se connecter au serveur. Vérifiez votre connexion internet.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
       setError(errorMessage);
-      toast.error(errorMessage);
+
+      toast.error(errorMessage, {
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +94,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
-      {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/10 rounded-full blur-3xl" />
@@ -87,8 +115,19 @@ export default function Login() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-5">
             {error && (
-              <Alert variant="destructive" className="animate-in slide-in-from-top-2">
-                <AlertDescription className="flex items-center gap-2">
+              <Alert
+                variant="destructive"
+                className="animate-in slide-in-from-top-2 relative"
+              >
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  className="absolute top-2 right-2 p-1 hover:bg-destructive/20 rounded transition-colors"
+                  aria-label="Fermer l'erreur"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <AlertDescription className="flex items-center gap-2 pr-6">
                   {error}
                 </AlertDescription>
               </Alert>
@@ -105,7 +144,9 @@ export default function Login() {
                   type="email"
                   placeholder="admin@autopiecesplus.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="pl-10 h-11"
                   disabled={isLoading}
                   required
@@ -124,7 +165,9 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="pl-10 pr-10 h-11"
                   disabled={isLoading}
                   required
@@ -136,6 +179,7 @@ export default function Login() {
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
+                  asChild={false}
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4 text-muted-foreground" />
@@ -148,11 +192,17 @@ export default function Login() {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded border-muted" disabled={isLoading} />
-                <span className="text-muted-foreground">Se souvenir de moi</span>
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-muted"
+                  disabled={isLoading}
+                />
+                <span className="text-muted-foreground">
+                  Se souvenir de moi
+                </span>
               </label>
               <a href="#" className="text-primary hover:underline font-medium">
-                Mot de passe oublié ?
+                Mot de passe oublié
               </a>
             </div>
           </CardContent>
@@ -162,6 +212,7 @@ export default function Login() {
               type="submit"
               className="w-full h-11 gradient-primary text-primary-foreground shadow-glow"
               disabled={isLoading}
+              asChild={false}
             >
               {isLoading ? (
                 <>
@@ -174,16 +225,20 @@ export default function Login() {
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Identifiants de démo :{" "}
+              Identifiants par défaut (après création par un admin) :
               <br />
-              <span className="font-mono bg-muted px-2 py-0.5 rounded">admin@autopiecesplus.com</span> /{" "}
-              <span className="font-mono bg-muted px-2 py-0.5 rounded">admin123</span>
+              <span className="font-mono bg-muted px-2 py-0.5 rounded">
+                admin@autopiecesplus.com
+              </span>{" "}
+              /{" "}
+              <span className="font-mono bg-muted px-2 py-0.5 rounded">
+                123456
+              </span>
             </p>
           </CardFooter>
         </form>
       </Card>
 
-      {/* Footer */}
       <div className="absolute bottom-4 text-xs text-muted-foreground text-center">
         <p>&copy; 2024 AUTOPIECES+. Tous droits réservés.</p>
       </div>

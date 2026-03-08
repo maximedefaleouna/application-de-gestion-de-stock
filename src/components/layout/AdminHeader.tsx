@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+﻿import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,25 +12,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { mockNotifications } from "@/data/mockData";
+import { notificationService, authService } from "@/services/api.service";
 import { toast } from "sonner";
 
 interface AdminHeaderProps {
   title: string;
   subtitle?: string;
-  children?: ReactNode;
+  children: ReactNode;
 }
 
 export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
   const navigate = useNavigate();
-  const unreadCount = mockNotifications.filter(n => !n.read).length;
-  
-  // Get current user from localStorage
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  const loadNotifications = async () => {
+    try {
+      const response = await notificationService.getAll();
+      setNotifications((response.data || []).slice(0, 4));
+    } catch {
+      setNotifications([]);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
+    authService.logout();
     toast.success("Déconnexion réussie");
     navigate("/login");
   };
@@ -42,9 +54,7 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
           {children}
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">{title}</h1>
-            {subtitle && (
-              <p className="text-xs md:text-sm text-muted-foreground mt-0.5">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-xs md:text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
           </div>
         </div>
 
@@ -75,21 +85,17 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
                 <Badge variant="secondary">{unreadCount} nouvelles</Badge>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {mockNotifications.slice(0, 4).map((notification) => (
+              {notifications.map((notification) => (
                 <DropdownMenuItem
                   key={notification.id}
-                  className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${
-                    !notification.read ? "bg-accent/50" : ""
-                  }`}
+                  className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${!notification.read ? "bg-accent/50" : ""}`}
                 >
                   <span className="font-medium text-sm">{notification.title}</span>
-                  <span className="text-xs text-muted-foreground line-clamp-1">
-                    {notification.message}
-                  </span>
+                  <span className="text-xs text-muted-foreground line-clamp-1">{notification.message}</span>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-center justify-center text-primary font-medium">
+              <DropdownMenuItem className="text-center justify-center text-primary font-medium" onClick={() => navigate("/notifications")}>
                 Voir toutes les alertes
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -102,8 +108,10 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
                   <User className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">{currentUser.name || "Utilisateur"}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{currentUser.role === "admin" ? "Administrateur" : "Vendeur"}</p>
+                  <p className="text-sm font-medium">{`${currentUser.prenom || ""} ${currentUser.nom || ""}`.trim() || "Utilisateur"}</p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {currentUser.role === "admin" ? "Administrateur" : "Vendeur"}
+                  </p>
                 </div>
               </Button>
             </DropdownMenuTrigger>
@@ -113,10 +121,6 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
               <DropdownMenuItem onClick={() => navigate("/profile")}>
                 <User className="w-4 h-4 mr-2" />
                 Profil
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="w-4 h-4 mr-2" />
-                Paramètres
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive" onClick={handleLogout}>

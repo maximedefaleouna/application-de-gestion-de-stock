@@ -8,7 +8,7 @@ import { Menu } from "lucide-react";
 interface AdminLayoutProps {
   children: ReactNode;
   title: string;
-  subtitle?: string;
+  subtitle: string;
 }
 
 export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {

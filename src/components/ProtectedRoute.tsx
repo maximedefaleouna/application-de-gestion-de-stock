@@ -5,8 +5,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // Check if user is authenticated (mock implementation)
-  const authToken = localStorage.getItem("authToken");
+  const authToken = localStorage.getItem("token");
   const isAuthenticated = !!authToken;
 
   if (!isAuthenticated) {

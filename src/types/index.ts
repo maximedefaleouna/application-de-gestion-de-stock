@@ -25,7 +25,7 @@ export interface SaleItem {
   productName: string;
   quantity: number;
   unitPrice: number;
-  imageUrl?: string;
+  imageUrl: string;
 }
 
 export interface Sale {
@@ -36,9 +36,9 @@ export interface Sale {
   remainingAmount: number;
   paymentMethod: PaymentMethod;
   status: SaleStatus;
-  clientId?: string;
-  clientName?: string;
-  clientPhone?: string;
+  clientId: string;
+  clientName: string;
+  clientPhone: string;
   isCredit: boolean;
   seller: string;
   createdAt: Date;
@@ -49,8 +49,8 @@ export interface Client {
   id: string;
   name: string;
   phone: string;
-  email?: string;
-  address?: string;
+  email: string;
+  address: string;
   totalCredit: number;
   totalPaid: number;
   createdAt: Date;
@@ -81,12 +81,12 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phone: string;
   role: UserRole;
-  avatar?: string;
+  avatar: string;
   active: boolean;
   createdAt: Date;
-  lastLogin?: Date;
+  lastLogin: Date;
 }
 
 export interface Notification {

@@ -16,6 +16,7 @@ import Users from "./pages/Users";
 import Notifications from "./pages/Notifications";
 import Stats from "./pages/Stats";
 import Configuration from "./pages/Configuration";
+import Receipt from "./pages/Receipt";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -121,6 +122,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Configuration />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/receipt"
+            element={
+              <ProtectedRoute>
+                <Receipt />
               </ProtectedRoute>
             }
           />

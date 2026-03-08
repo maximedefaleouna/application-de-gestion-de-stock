@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 
 interface DateRangePickerProps {
-  dateRange: DateRange | undefined;
+  dateRange?: DateRange;
   onDateRangeChange: (range: DateRange | undefined) => void;
   className?: string;
 }
@@ -20,20 +20,12 @@ export function DateRangePicker({ dateRange, onDateRangeChange, className }: Dat
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "justify-start text-left font-normal",
-            !dateRange && "text-muted-foreground",
-            className
-          )}
-        >
+        <Button variant="outline" className={cn("justify-start text-left font-normal", !dateRange && "text-muted-foreground", className)}>
           <CalendarIcon className="mr-2 h-4 w-4" />
           {dateRange?.from ? (
             dateRange.to ? (
               <>
-                {format(dateRange.from, "dd MMM", { locale: fr })} -{" "}
-                {format(dateRange.to, "dd MMM yyyy", { locale: fr })}
+                {format(dateRange.from, "dd MMM", { locale: fr })} - {format(dateRange.to, "dd MMM yyyy", { locale: fr })}
               </>
             ) : (
               format(dateRange.from, "dd MMM yyyy", { locale: fr })

@@ -1,26 +1,23 @@
-import { useState, useRef } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Tabs, TabsList, TabsTrigger,
-} from "@/components/ui/tabs";
-import { mockProducts } from "@/data/mockData";
 import { Product } from "@/types";
 import { Plus, Search, Edit, Trash2, Package, Upload, X, Image, Tag, Settings2 } from "lucide-react";
 import { toast } from "sonner";
+import { categorieService, produitService } from "@/services/api.service";
 
-const defaultCategories = ["Freinage", "Filtration", "Suspension", "Électrique", "Distribution", "Allumage", "Roulement", "Lubrifiants", "Carrosserie", "Échappement"];
+type CategoryItem = { id: string; name: string };
 
 const formatCFA = (amount: number) => amount.toLocaleString('fr-FR') + ' F';
 
@@ -33,8 +30,9 @@ const emptyProduct = (): Omit<Product, 'id'> => ({
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [categories, setCategories] = useState<string[]>(defaultCategories);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryItems, setCategoryItems] = useState<CategoryItem[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
@@ -45,6 +43,43 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const normalizeCategories = (raw: any): CategoryItem[] => {
+    const payload = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
+    return payload
+      .map((item: any) => ({
+        id: String(item?.id ?? item?._id ?? item?.nom ?? item?.name ?? ""),
+        name: String(item?.nom ?? item?.name ?? "").trim(),
+      }))
+      .filter((item: CategoryItem) => Boolean(item.id && item.name));
+  };
+
+  const loadProducts = async () => {
+    try {
+      const response = await produitService.getAll();
+      setProducts(response.data || []);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors du chargement des produits");
+      setProducts([]);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await categorieService.getAll();
+      const items = normalizeCategories(response);
+      setCategoryItems(items);
+      setCategories(items.map((item) => item.name));
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors du chargement des catégories");
+      setCategoryItems([]);
+      setCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+    loadCategories();
+  }, []);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,8 +89,16 @@ export default function Products() {
     return matchesSearch && matchesCategory;
   });
 
-  const toggleAvailability = (id: string) => {
-    setProducts(products.map(p => p.id === id ? { ...p, available: !p.available } : p));
+  const toggleAvailability = async (id: string) => {
+    const current = products.find((p) => p.id === id);
+    if (!current) return;
+
+    try {
+      await produitService.update(id, { available: !current.available });
+      setProducts(products.map((p) => (p.id === id ? { ...p, available: !p.available } : p)));
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors de la mise à jour");
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +108,6 @@ export default function Products() {
       reader.onloadend = () => {
         const result = reader.result as string;
         setPreviewImage(result);
-        setFormData(prev => ({ ...prev, imageUrl: result }));
       };
       reader.readAsDataURL(file);
     }
@@ -84,7 +126,7 @@ export default function Products() {
     setIsEditDialogOpen(true);
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!formData.name || !formData.reference) {
       toast.error("Nom et référence obligatoires !");
       return;
@@ -93,52 +135,127 @@ export default function Products() {
       toast.error("Veuillez sélectionner une catégorie !");
       return;
     }
-    const newProduct: Product = { ...formData, id: `P${Date.now()}` };
-    setProducts([newProduct, ...products]);
-    setIsAddDialogOpen(false);
-    toast.success("Produit ajouté avec succès !");
+
+    const selectedFile = fileInputRef.current?.files?.[0];
+    const payload = selectedFile
+      ? (() => {
+          const form = new FormData();
+          form.append("name", formData.name);
+          form.append("reference", formData.reference);
+          form.append("description", formData.description || "");
+          form.append("category", formData.category);
+          form.append("brand", formData.brand || "N/A");
+          form.append("buyPrice", String(Number(formData.buyPrice || 0)));
+          form.append("sellPrice", String(Number(formData.sellPrice || 0)));
+          form.append("stock", String(Number(formData.stock || 0)));
+          form.append("minStock", String(Number(formData.minStock || 5)));
+          form.append("available", String(Boolean(formData.available)));
+          form.append("image", selectedFile);
+          return form;
+        })()
+      : {
+          name: formData.name,
+          reference: formData.reference,
+          description: formData.description || "",
+          category: formData.category,
+          brand: formData.brand || "N/A",
+          buyPrice: Number(formData.buyPrice || 0),
+          sellPrice: Number(formData.sellPrice || 0),
+          stock: Number(formData.stock || 0),
+          minStock: Number(formData.minStock || 5),
+          available: Boolean(formData.available),
+          imageUrl: /^https?:\/\//.test(formData.imageUrl || "") ? formData.imageUrl : "",
+        };
+
+    try {
+      await produitService.create(payload);
+      await loadProducts();
+      setIsAddDialogOpen(false);
+      toast.success("Produit ajouté avec succès !");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors de l'ajout du produit");
+    }
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!editingProduct) return;
-    setProducts(products.map(p => p.id === editingProduct.id ? { ...formData, id: editingProduct.id } : p));
-    setIsEditDialogOpen(false);
-    setEditingProduct(null);
-    toast.success("Produit modifié avec succès !");
+    try {
+      await produitService.update(editingProduct.id, {
+        name: formData.name,
+        reference: formData.reference,
+        description: formData.description || "",
+        category: formData.category,
+        brand: formData.brand || "N/A",
+        buyPrice: Number(formData.buyPrice || 0),
+        sellPrice: Number(formData.sellPrice || 0),
+        stock: Number(formData.stock || 0),
+        minStock: Number(formData.minStock || 5),
+        imageUrl:
+          /^https?:\/\//.test(formData.imageUrl || "") || (formData.imageUrl || "").startsWith("/uploads/")
+            ? formData.imageUrl
+            : editingProduct.imageUrl || "",
+        available: Boolean(formData.available),
+      });
+      await loadProducts();
+      setIsEditDialogOpen(false);
+      setEditingProduct(null);
+      toast.success("Produit modifié avec succès !");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors de la modification du produit");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setProducts(products.filter(p => p.id !== id));
-    toast.success("Produit supprimé !");
+  const handleDelete = async (id: string) => {
+    try {
+      await produitService.delete(id);
+      setProducts(products.filter((p) => p.id !== id));
+      toast.success("Produit supprimé !");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors de la suppression");
+    }
   };
 
-  const addCategory = () => {
+  const addCategory = async () => {
     if (!newCategory.trim()) return;
     if (categories.includes(newCategory.trim())) {
       toast.error("Cette catégorie existe déjà !");
       return;
     }
-    setCategories([...categories, newCategory.trim()]);
-    setNewCategory("");
-    toast.success("Catégorie ajoutée !");
+    try {
+      await categorieService.create({ nom: newCategory.trim(), description: "" });
+      await loadCategories();
+      setNewCategory("");
+      toast.success("Catégorie ajoutée !");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors de l'ajout de la catégorie");
+    }
   };
 
-  const updateCategory = (index: number) => {
+  const updateCategory = async (index: number) => {
     if (!editingCategoryValue.trim()) return;
-    const oldName = categories[index];
-    const updated = [...categories];
-    updated[index] = editingCategoryValue.trim();
-    setCategories(updated);
-    setProducts(products.map(p => p.category === oldName ? { ...p, category: editingCategoryValue.trim() } : p));
-    setEditingCategoryIndex(null);
-    setEditingCategoryValue("");
-    toast.success("Catégorie modifiée !");
+    const category = categoryItems[index];
+    if (!category?.id) return;
+    try {
+      await categorieService.update(category.id, { nom: editingCategoryValue.trim() });
+      await Promise.all([loadCategories(), loadProducts()]);
+      setEditingCategoryIndex(null);
+      setEditingCategoryValue("");
+      toast.success("Catégorie modifiée !");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors de la modification de la catégorie");
+    }
   };
 
-  const deleteCategory = (index: number) => {
-    const name = categories[index];
-    setCategories(categories.filter((_, i) => i !== index));
-    toast.success(`Catégorie "${name}" supprimée`);
+  const deleteCategory = async (index: number) => {
+    const category = categoryItems[index];
+    if (!category?.id) return;
+    try {
+      await categorieService.delete(category.id);
+      await Promise.all([loadCategories(), loadProducts()]);
+      toast.success(`Catégorie "${category.name}" supprimée`);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erreur lors de la suppression de la catégorie");
+    }
   };
 
   const ProductFormFields = () => (
@@ -231,28 +348,16 @@ export default function Products() {
           <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">₣</span>
           Prix & Stock
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Prix d'achat (FCFA)</Label>
-            <Input type="number" placeholder="0" value={formData.buyPrice || ""} onChange={(e) => setFormData({ ...formData, buyPrice: Number(e.target.value) })} />
-          </div>
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Prix de vente (FCFA)</Label>
             <Input type="number" placeholder="0" value={formData.sellPrice || ""} onChange={(e) => setFormData({ ...formData, sellPrice: Number(e.target.value) })} />
           </div>
-          <div className="space-y-1.5 col-span-2 sm:col-span-1">
+          <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Stock initial</Label>
             <Input type="number" placeholder="0" value={formData.stock || ""} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })} />
           </div>
         </div>
-        {formData.buyPrice > 0 && formData.sellPrice > 0 && (
-          <div className="p-3 rounded-lg bg-accent/50 border border-accent">
-            <p className="text-xs text-accent-foreground">
-              💰 Marge: <span className="font-bold">{formatCFA(formData.sellPrice - formData.buyPrice)}</span>
-              {' '}({Math.round(((formData.sellPrice - formData.buyPrice) / formData.buyPrice) * 100)}%)
-            </p>
-          </div>
-        )}
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Seuil d'alerte stock</Label>
           <Input type="number" placeholder="5" value={formData.minStock || ""} onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })} className="max-w-[200px]" />
@@ -449,3 +554,4 @@ export default function Products() {
     </AdminLayout>
   );
 }
+
