@@ -59,6 +59,13 @@ export function PeriodSelector({ onPeriodChange, className }: PeriodSelectorProp
         break;
     }
 
+    console.log('PeriodSelector - Changement:', {
+      period: value,
+      range: newRange,
+      from: newRange.from?.toISOString(),
+      to: newRange.to?.toISOString()
+    });
+
     setDateRange(newRange);
     onPeriodChange(value, newRange);
   };
@@ -97,16 +104,16 @@ export function PeriodSelector({ onPeriodChange, className }: PeriodSelectorProp
       case "last30days":
         return "30 derniers jours";
       case "specific":
-        return selectedDate ? format(selectedDate, "dd MMMM yyyy", { locale: fr }) : "Date sp��cifique";
+        return selectedDate ? format(selectedDate, "dd MMMM yyyy", { locale: fr }) : "Date spécifique";
       case "custom":
         if (dateRange.from && dateRange.to) {
           return `${format(dateRange.from, "dd/MM/yyyy")} - ${format(dateRange.to, "dd/MM/yyyy")}`;
         }
-        return "P��riode sp��cifique";
+        return "Période spécifique";
       case "custom":
         if (dateRange.from && dateRange.to) {
         }
-        return "P��riode personnalisée";
+        return "Période personnalisée";
     }
   };
 
@@ -122,15 +129,15 @@ export function PeriodSelector({ onPeriodChange, className }: PeriodSelectorProp
         <div className="flex flex-wrap gap-2">
           <Select value={period} onValueChange={handlePeriodChange}>
             <SelectTrigger className="w-[180px] h-9 text-sm">
-              <SelectValue placeholder="S��lectionner une p��riode" />
+              <SelectValue placeholder="Sélectionner une période" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="today">Aujourd'hui</SelectItem>
               <SelectItem value="yesterday">Hier</SelectItem>
               <SelectItem value="last7days">7 derniers jours</SelectItem>
               <SelectItem value="last30days">30 derniers jours</SelectItem>
-              <SelectItem value="specific">Date sp��cifique</SelectItem>
-              <SelectItem value="custom">Intervalle personnalis��</SelectItem>
+              <SelectItem value="specific">Date spécifique</SelectItem>
+              <SelectItem value="custom">Intervalle personnalisé</SelectItem>
             </SelectContent>
           </Select>
 

@@ -68,7 +68,7 @@ export function RecentSales() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-foreground">{sale.id}</span>
+                  <span className="font-medium text-foreground">{sale.formattedVenteNumber || `V-${String(sale.venteNumber || 0).padStart(7, '0')}`}</span>
                   <Badge variant={statusConfig[sale.status]?.variant || "default"}>
                     {statusConfig[sale.status]?.label || sale.status}
                   </Badge>

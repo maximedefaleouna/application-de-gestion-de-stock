@@ -5,13 +5,14 @@ import { toast } from "sonner";
 import { Printer, Download } from "lucide-react";
 import html2pdf from "html2pdf.js";
 import { useSearchParams } from "react-router-dom";
-import { venteService } from "@/services/api.service";
+import { venteService, configurationService } from "@/services/api.service";
 
 const formatCFA = (amount: number) => amount.toLocaleString("fr-FR") + " F CFA";
 
 export default function Receipt() {
   const [searchParams] = useSearchParams();
   const [sale, setSale] = useState<any | null>(null);
+  const [configuration, setConfiguration] = useState<any | null>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
   const autoActionDoneRef = useRef(false);
   const mode = searchParams.get("mode");
@@ -25,6 +26,10 @@ export default function Receipt() {
       try {
         const response = await venteService.getById(saleId);
         setSale(response.data || null);
+        
+        // Load configuration for shop name
+        const configResponse = await configurationService.get();
+        setConfiguration(configResponse.data || null);
       } catch {
         setSale(null);
       }
@@ -53,7 +58,7 @@ export default function Receipt() {
       await html2pdf()
         .set({
           margin: 0,
-          filename: `Recu_${sale.id}_${new Date().toISOString().split("T")[0]}.pdf`,
+          filename: `Recu_${sale.formattedVenteNumber || sale.id}_${new Date().toISOString().split("T")[0]}.pdf`,
           image: { type: "jpeg" as const, quality: 0.98 },
           html2canvas: {
             scale: 2,
@@ -128,10 +133,22 @@ export default function Receipt() {
         className="max-w-md mx-auto shadow-lg print:shadow-none print:border-0 print:max-w-none"
       >
         <CardContent className="p-6 space-y-3">
-          <h1 className="text-xl font-bold text-center">Reçu de vente</h1>
+          <h1 className="text-xl font-bold text-center">
+            {configuration?.nom || "AUTOPIECES+"}
+          </h1>
           <p className="text-sm text-muted-foreground text-center">
-            N° {sale.id}
+            Reçu de vente
           </p>
+          <p className="text-sm text-muted-foreground text-center">
+            N° {sale.formattedVenteNumber || sale.id}
+          </p>
+          {configuration && (
+            <div className="text-xs text-muted-foreground text-center space-y-0.5">
+              {configuration.adresse && <p>{configuration.adresse}</p>}
+              {configuration.telephone && <p>Tél: {configuration.telephone}</p>}
+              {configuration.email && <p>Email: {configuration.email}</p>}
+            </div>
+          )}
           <div className="space-y-2 pt-3 border-t">
             {(sale.items || []).map((item: any, idx: number) => (
               <div key={idx} className="flex justify-between text-sm">

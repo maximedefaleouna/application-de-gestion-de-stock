@@ -43,7 +43,7 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
 
   const handleLogout = () => {
     authService.logout();
-    toast.success("Dé©connexion ré©ussie");
+    toast.success("Deconnexion reussie");
     navigate("/login");
   };
 
@@ -80,7 +80,7 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel className="flex items-center justify-between">
+              <DropdownMenuLabel className="flex items-center justify-between" inset={false}>
                 Alertes
                 <Badge variant="secondary">{unreadCount} nouvelles</Badge>
               </DropdownMenuLabel>
@@ -88,14 +88,13 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
               {notifications.map((notification) => (
                 <DropdownMenuItem
                   key={notification.id}
-                  className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${!notification.read ? "bg-accent/50" : ""}`}
-                >
+                  className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${!notification.read ? "bg-accent/50" : ""}`} inset={false}                >
                   <span className="font-medium text-sm">{notification.title}</span>
                   <span className="text-xs text-muted-foreground line-clamp-1">{notification.message}</span>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-center justify-center text-primary font-medium" onClick={() => navigate("/notifications")}>
+              <DropdownMenuItem className="text-center justify-center text-primary font-medium" onClick={() => navigate("/notifications")} inset={false}>
                 Voir toutes les alertes
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -116,15 +115,15 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+              <DropdownMenuLabel inset={false}>Mon compte</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
+              <DropdownMenuItem onClick={() => navigate("/profile")} inset={false}>
                 <User className="w-4 h-4 mr-2" />
                 Profil
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
-                Dé©connexion
+              <DropdownMenuItem className="text-destructive" onClick={handleLogout} inset={false}>
+                DÃ©connexion  
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

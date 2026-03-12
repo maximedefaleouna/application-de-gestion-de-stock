@@ -35,6 +35,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { authService } from "@/services/api.service";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -43,7 +44,18 @@ export default function Profile() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  // Get user from localStorage
+  const storedUser = localStorage.getItem("user");
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+  
+  // Extract user fields with fallbacks
+  const userFirstName = currentUser?.prenom || currentUser?.firstName || "";
+  const userLastName = currentUser?.nom || currentUser?.lastName || "";
+  const userName = currentUser?.name || `${userFirstName} ${userLastName}`.trim() || "Utilisateur";
+  const userEmail = currentUser?.email || "-";
+  const userRole = currentUser?.role || "vendeur";
+  const userCreatedAt = currentUser?.createdAt || currentUser?.creeLe || null;
+  const userLastLogin = currentUser?.lastLogin || currentUser?.derniereConnexion || null;
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -51,7 +63,7 @@ export default function Profile() {
     confirmPassword: "",
   });
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (
       !passwordData.currentPassword ||
       !passwordData.newPassword ||
@@ -73,13 +85,33 @@ export default function Profile() {
       return;
     }
 
-    toast.success("Mot de passe modifié avec succès");
-    setIsPasswordDialogOpen(false);
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    try {
+      await authService.changePassword(passwordData.currentPassword, passwordData.newPassword);
+      toast.success("Mot de passe modifié avec succès");
+      setIsPasswordDialogOpen(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      let errorMessage = "Erreur lors du changement de mot de passe";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (Array.isArray(error.response?.data?.details)) {
+        const details = error.response.data.details;
+        errorMessage = details.map((d: any) => d.message).join(", ");
+      } else if (error.response?.data) {
+        errorMessage = typeof error.response.data === 'string' 
+          ? error.response.data 
+          : JSON.stringify(error.response.data);
+      }
+      
+      toast.error(errorMessage);
+    }
   };
 
   const handleLogout = () => {
@@ -100,28 +132,27 @@ export default function Profile() {
             <div className="flex items-center gap-4">
               <Avatar className="w-24 h-24 bg-gradient-to-br from-primary to-secondary">
                 <AvatarFallback className="text-3xl font-bold text-primary-foreground">
-                  {currentUser.name
-                    ?.split(" ")
-                    .map((n: string) => n[0])
-                    .join("") || "U"}
+                  {(userFirstName && userLastName)
+                    ? `${userFirstName.charAt(0)}${userLastName.charAt(0)}`
+                    : userName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <CardTitle className="text-3xl font-bold">
-                  {currentUser.name || "Utilisateur"}
+                  {userName}
                 </CardTitle>
                 <CardDescription className="text-base mt-1">
-                  {currentUser.email || "-"}
+                  {userEmail}
                 </CardDescription>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge
                     variant={
-                      currentUser.role === "admin" ? "default" : "secondary"
+                      userRole === "admin" ? "default" : "secondary"
                     }
                     className="capitalize"
                   >
                     <Shield className="w-3 h-3 mr-1" />
-                    {currentUser.role === "admin"
+                    {userRole === "admin"
                       ? "Administrateur"
                       : "Vendeur"}
                   </Badge>
@@ -142,10 +173,18 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-muted-foreground">Nom complet</Label>
+                <Label className="text-muted-foreground">Nom</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <User className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">{currentUser.name || "-"}</span>
+                  <span className="font-medium">{userLastName || "-"}</span>
+                </div>
+              </div>
+              <Separator />
+              <div>
+                <Label className="text-muted-foreground">Prénom</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">{userFirstName || "-"}</span>
                 </div>
               </div>
               <Separator />
@@ -153,9 +192,7 @@ export default function Profile() {
                 <Label className="text-muted-foreground">Email</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">
-                    {currentUser.email || "-"}
-                  </span>
+                  <span className="font-medium">{userEmail}</span>
                 </div>
               </div>
               <Separator />
@@ -164,7 +201,7 @@ export default function Profile() {
                 <div className="flex items-center gap-2 mt-1">
                   <Shield className="w-4 h-4 text-muted-foreground" />
                   <span className="font-medium capitalize">
-                    {currentUser.role === "admin"
+                    {userRole === "admin"
                       ? "Administrateur"
                       : "Vendeur"}
                   </span>
@@ -188,9 +225,9 @@ export default function Profile() {
                 <div className="flex items-center gap-2 mt-1">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   <span className="font-medium">
-                    {currentUser.createdAt
+                    {userCreatedAt
                       ? format(
-                          new Date(currentUser.createdAt),
+                          new Date(userCreatedAt),
                           "dd MMMM yyyy",
                           { locale: fr },
                         )
@@ -206,10 +243,10 @@ export default function Profile() {
                 <div className="flex items-center gap-2 mt-1">
                   <KeyRound className="w-4 h-4 text-muted-foreground" />
                   <span className="font-medium">
-                    {currentUser.lastLogin
+                    {userLastLogin
                       ? format(
-                          new Date(currentUser.lastLogin),
-                          "dd MMMM yyyy �� HH:mm",
+                          new Date(userLastLogin),
+                          "dd MMMM yyyy à HH:mm",
                           { locale: fr },
                         )
                       : "Aujourd'hui"}
@@ -284,7 +321,7 @@ export default function Profile() {
                   <Input
                     id="currentPassword"
                     type={showCurrentPassword ? "text" : "password"}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="password"
                     value={passwordData.currentPassword}
                     onChange={(e) =>
                       setPasswordData({
@@ -354,7 +391,7 @@ export default function Profile() {
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="confirmer mot de passe"
                     value={passwordData.confirmPassword}
                     onChange={(e) =>
                       setPasswordData({

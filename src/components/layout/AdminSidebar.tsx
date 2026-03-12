@@ -11,10 +11,14 @@
   LogOut,
   Wrench,
   User,
+  DollarSign,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useApp } from "@/contexts/AppContext";
+import { notificationService } from "@/services/api.service";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { title: "Tableau de bord", url: "/", icon: LayoutDashboard },
@@ -22,6 +26,7 @@ const navItems = [
   { title: "Produits", url: "/products", icon: Package },
   { title: "Stock", url: "/stock", icon: Warehouse },
   { title: "Clients & Credits", url: "/clients", icon: CreditCard },
+  { title: "Paiement Dettes", url: "/debt-payments", icon: DollarSign },
   { title: "Utilisateurs", url: "/users", icon: Users },
   { title: "Alertes", url: "/notifications", icon: Bell },
   { title: "Statistiques", url: "/stats", icon: BarChart3 },
@@ -37,11 +42,29 @@ interface AdminSidebarProps {
 export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { configuration } = useApp();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    loadUnreadCount();
+    // Refresh count every 30 seconds
+    const interval = setInterval(loadUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadUnreadCount = async () => {
+    try {
+      const response = await notificationService.getUnread();
+      setUnreadCount(response.data?.length || 0);
+    } catch (error) {
+      console.error("Erreur chargement count notifications:", error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
-    toast.success("D��connexion r��ussie");
+    toast.success("Deconnexion reussie");
     navigate("/login");
   };
 
@@ -52,7 +75,9 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
           <Wrench className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-sidebar-foreground">Pi��ces Shop</h1>
+          <h1 className="text-lg font-bold text-sidebar-foreground">
+            {configuration?.nom || "Pieces Shop"}
+          </h1>
           <p className="text-xs text-sidebar-muted">Gestion Boutique</p>
         </div>
       </div>
@@ -75,8 +100,10 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
                 >
                   <item.icon className="w-5 h-5" />
                   <span>{item.title}</span>
-                  {item.title === "Alertes" && (
-                    <span className="ml-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">3</span>
+                  {item.title === "Alertes" && unreadCount > 0 && (
+                    <div className="ml-auto flex items-center justify-center w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full font-semibold">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </div>
                   )}
                 </NavLink>
               </li>
@@ -109,7 +136,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-muted hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
         >
           <LogOut className="w-5 h-5" />
-          <span>D��connexion</span>
+          <span>Déconnexion</span>
         </button>
       </div>
     </aside>

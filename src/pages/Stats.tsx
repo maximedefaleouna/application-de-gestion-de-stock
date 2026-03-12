@@ -18,7 +18,8 @@ import {
   Bar,
 } from "recharts";
 import { Download, TrendingUp, ShoppingCart, CreditCard } from "lucide-react";
-import { venteService, produitService } from "@/services/api.service";
+import { dashboardService } from "@/services/api.service";
+import { startOfDay, endOfDay } from "date-fns";
 
 interface CustomDateRange {
   from: Date | undefined;
@@ -38,29 +39,42 @@ const categoryColors = [
 
 export default function Stats() {
   const [dateRange, setDateRange] = useState<CustomDateRange>({
-    from: new Date(),
-    to: new Date(),
+    from: startOfDay(new Date()),
+    to: endOfDay(new Date()),
   });
   const [currentPeriod, setCurrentPeriod] = useState<DateRangeType>("today");
-  const [sales, setSales] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [statsData, setStatsData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [salesRes, productsRes] = await Promise.all([
-          venteService.getAll(),
-          produitService.getAll(),
-        ]);
-        setSales(salesRes.data || []);
-        setProducts(productsRes.data || []);
-      } catch {
-        setSales([]);
-        setProducts([]);
-      }
-    };
-    loadData();
+    loadStatistics();
   }, []);
+
+  const loadStatistics = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Formater les dates correctement en tenant compte du fuseau horaire local
+      const formatDateToLocal = (date: Date | undefined) => {
+        if (!date) return undefined;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      const startDate = formatDateToLocal(dateRange.from);
+      const endDate = formatDateToLocal(dateRange.to);
+      
+      const response = await dashboardService.getStatistiques(startDate, endDate);
+      setStatsData(response.data || null);
+    } catch (error) {
+      console.error("Erreur chargement statistiques:", error);
+      setStatsData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePeriodChange = (
     period: DateRangeType,
@@ -68,78 +82,85 @@ export default function Stats() {
   ) => {
     setCurrentPeriod(period);
     setDateRange(range);
+    
+    // Recharger les statistiques avec la NOUVELLE période (en utilisant range directement)
+    loadStatisticsWithRange(range);
+  };
+
+  const loadStatisticsWithRange = (range: CustomDateRange) => {
+    try {
+      setIsLoading(true);
+      
+      // Formater les dates correctement en tenant compte du fuseau horaire local
+      const formatDateToLocal = (date: Date | undefined) => {
+        if (!date) return undefined;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      const startDate = formatDateToLocal(range.from);
+      const endDate = formatDateToLocal(range.to);
+      
+      console.log('Stats - Période sélectionnée:', { startDate, endDate, range });
+      
+      dashboardService.getStatistiques(startDate, endDate)
+        .then((response) => {
+          setStatsData(response.data || null);
+        })
+        .catch((error) => {
+          console.error("Erreur chargement statistiques:", error);
+          setStatsData(null);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } catch (error) {
+      console.error("Erreur chargement statistiques:", error);
+      setStatsData(null);
+      setIsLoading(false);
+    }
   };
 
   const dashboardStats = useMemo(() => {
-    const totalRevenue = sales.reduce(
-      (acc, s) => acc + Number(s.totalAmount || 0),
-      0,
-    );
-    const totalSales = sales.length;
-    const pendingCredits = sales.reduce(
-      (acc, s) => acc + Number(s.remainingAmount || 0),
-      0,
-    );
-    return { totalRevenue, totalSales, pendingCredits };
-  }, [sales]);
+    if (!statsData) {
+      return { totalRevenue: 0, totalSales: 0, pendingCredits: 0 };
+    }
+    return {
+      totalRevenue: statsData.summary?.totalRevenue || 0,
+      totalSales: statsData.summary?.totalSales || 0,
+      pendingCredits: statsData.summary?.pendingCredits || 0,
+    };
+  }, [statsData]);
 
   const weeklyRevenueData = useMemo(() => {
-    const dayLabels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-    const now = new Date();
-    const days: { day: string; revenue: number; sales: number; key: string }[] =
-      [];
-
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      days.push({
-        day: dayLabels[(d.getDay() + 6) % 7],
-        revenue: 0,
-        sales: 0,
-        key: d.toISOString().slice(0, 10),
-      });
-    }
-
-    sales.forEach((sale) => {
-      const key = new Date(sale.createdAt).toISOString().slice(0, 10);
-      const day = days.find((d) => d.key === key);
-      if (day) {
-        day.revenue += Number(sale.totalAmount || 0);
-        day.sales += 1;
-      }
-    });
-
-    return days.map(({ key, ...rest }) => rest);
-  }, [sales]);
+    if (!statsData?.evolutionData) return [];
+    return statsData.evolutionData.map((day: any) => ({
+      day: day.dayLabel || new Date(day.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
+      revenue: day.revenue || 0,
+      sales: day.sales || 0,
+    }));
+  }, [statsData]);
 
   const categoryData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    products.forEach((p) => {
-      const key = p.category || "Non class�";
-      counts[key] = (counts[key] || 0) + 1;
-    });
-    const total = products.length || 1;
-
-    return Object.entries(counts).map(([name, count], index) => ({
-      name,
-      value: Math.round((count / total) * 100),
+    if (!statsData?.categoryData) return [];
+    const total = statsData.categoryData.reduce((sum: number, cat: any) => sum + (cat.quantity || 0), 0) || 1;
+    
+    return statsData.categoryData.map((cat: any, index: number) => ({
+      name: cat.name || "Non classé",
+      value: Math.round(((cat.quantity || 0) / total) * 100),
       color: categoryColors[index % categoryColors.length],
     }));
-  }, [products]);
+  }, [statsData]);
 
   const topProducts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    sales.forEach((sale) => {
-      (sale.items || []).forEach((item: any) => {
-        counts[item.productName] =
-          (counts[item.productName] || 0) + Number(item.quantity || 0);
-      });
-    });
-    return Object.entries(counts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  }, [sales]);
+    if (!statsData?.topProducts) return [];
+    return statsData.topProducts.slice(0, 5).map((product: any) => ({
+      name: product.name || "Produit",
+      count: product.quantity || 0,
+    }));
+  }, [statsData]);
 
   return (
     <AdminLayout
@@ -222,7 +243,7 @@ export default function Stats() {
             </div>
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground">
-                Cr�dits en cours
+                Crédits en cours
               </p>
               <p className="text-lg md:text-2xl font-bold text-foreground truncate">
                 {formatCFA(dashboardStats.pendingCredits)}

@@ -27,6 +27,133 @@ const emptyProduct = (): Omit<Product, 'id'> => ({
   imageUrl: '', available: true,
 });
 
+interface ProductFormFieldsProps {
+  formData: Omit<Product, 'id'>;
+  setFormData: React.Dispatch<React.SetStateAction<Omit<Product, 'id'>>>;
+  previewImage: string;
+  setPreviewImage: React.Dispatch<React.SetStateAction<string>>;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  categories: string[];
+}
+
+const ProductFormFields: React.FC<ProductFormFieldsProps> = ({ 
+  formData, 
+  setFormData, 
+  previewImage, 
+  setPreviewImage, 
+  fileInputRef, 
+  handleImageUpload,
+  categories 
+}) => (
+  <div className="space-y-6 py-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin">
+    {/* Section: Image */}
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <Image className="w-4 h-4 text-primary" />
+        Photo du produit
+      </div>
+      <div className="flex items-center gap-4 p-4 rounded-xl border border-dashed border-border bg-muted/30">
+        <div
+          className="w-24 h-24 rounded-xl border-2 border-dashed border-primary/30 bg-background flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200 group"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {previewImage ? (
+            <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
+          ) : (
+            <div className="text-center">
+              <Upload className="w-6 h-6 mx-auto text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="text-[10px] text-muted-foreground mt-1 block">Ajouter</span>
+            </div>
+          )}
+        </div>
+        <div className="flex-1 space-y-2">
+          <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()} asChild={false}>
+            <Upload className="w-4 h-4 mr-2" />
+            Choisir une image
+          </Button>
+          {previewImage && (
+            <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => { setPreviewImage(""); setFormData(prev => ({ ...prev, imageUrl: "" })); } } asChild={false}>
+              <X className="w-4 h-4 mr-2" />
+              Retirer
+            </Button>
+          )}
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+          <p className="text-xs text-muted-foreground">JPG, PNG ou WebP. Max 5 MB.</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Section: Infos principales */}
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <Package className="w-4 h-4 text-primary" />
+        Informations principales
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Nom du produit <span className="text-destructive">*</span></Label>
+          <Input placeholder="Ex: Plaquettes de frein AV" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Référence <span className="text-destructive">*</span></Label>
+          <Input placeholder="Ex: PF-TOY-001" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} />
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Description</Label>
+        <Textarea placeholder="Décrivez le produit, compatibilités, spécifications..." rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+      </div>
+    </div>
+
+    {/* Section: Classification */}
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <Tag className="w-4 h-4 text-primary" />
+        Classification
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Catégorie <span className="text-destructive">*</span></Label>
+          <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+            <SelectTrigger><SelectValue placeholder="Sélectionner une catégorie" /></SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Marque</Label>
+          <Input placeholder="Ex: Bosch, Valeo..." value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} />
+        </div>
+      </div>
+    </div>
+
+    {/* Section: Prix & Stock */}
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">$</span>
+        Prix & Stock
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Prix de vente (FCFA)</Label>
+          <Input type="number" placeholder="0" value={formData.sellPrice || ""} onChange={(e) => setFormData({ ...formData, sellPrice: Number(e.target.value) })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Stock initial</Label>
+          <Input type="number" placeholder="0" value={formData.stock || ""} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })} />
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Seuil d'alerte stock</Label>
+        <Input type="number" placeholder="5" value={formData.minStock || ""} onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })} className="max-w-[200px]" />
+        <p className="text-[11px] text-muted-foreground">Vous serez alerté quand le stock descend sous ce seuil</p>
+      </div>
+    </div>
+  </div>
+);
+
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -258,116 +385,6 @@ export default function Products() {
     }
   };
 
-  const ProductFormFields = () => (
-    <div className="space-y-6 py-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin">
-      {/* Section: Image */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Image className="w-4 h-4 text-primary" />
-          Photo du produit
-        </div>
-        <div className="flex items-center gap-4 p-4 rounded-xl border border-dashed border-border bg-muted/30">
-          <div
-            className="w-24 h-24 rounded-xl border-2 border-dashed border-primary/30 bg-background flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200 group"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {previewImage ? (
-              <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
-            ) : (
-              <div className="text-center">
-                <Upload className="w-6 h-6 mx-auto text-muted-foreground group-hover:text-primary transition-colors" />
-                <span className="text-[10px] text-muted-foreground mt-1 block">Ajouter</span>
-              </div>
-            )}
-          </div>
-          <div className="flex-1 space-y-2">
-            <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()} asChild={false}>
-              <Upload className="w-4 h-4 mr-2" />
-              Choisir une image
-            </Button>
-            {previewImage && (
-              <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => { setPreviewImage(""); setFormData(prev => ({ ...prev, imageUrl: "" })); } } asChild={false}>
-                <X className="w-4 h-4 mr-2" />
-                Retirer
-              </Button>
-            )}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-            <p className="text-xs text-muted-foreground">JPG, PNG ou WebP. Max 5 MB.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Section: Infos principales */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Package className="w-4 h-4 text-primary" />
-          Informations principales
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Nom du produit <span className="text-destructive">*</span></Label>
-            <Input placeholder="Ex: Plaquettes de frein AV" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Référence <span className="text-destructive">*</span></Label>
-            <Input placeholder="Ex: PF-TOY-001" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} />
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Description</Label>
-          <Textarea placeholder="Décrivez le produit, compatibilités, spécifications..." rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
-          <Textarea placeholder="Décrivez le produit, compatibilités, spécifications..." rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
-        </div>
-      </div>
-
-      {/* Section: Classification */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Tag className="w-4 h-4 text-primary" />
-          Classification
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Catégorie <span className="text-destructive">*</span></Label>
-            <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-              <SelectTrigger><SelectValue placeholder="Sélectionner une catégorie" /></SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Marque</Label>
-            <Input placeholder="Ex: Bosch, Valeo..." value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} />
-          </div>
-        </div>
-      </div>
-
-      {/* Section: Prix & Stock */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">â‚£</span>
-          Prix & Stock
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Prix de vente (FCFA)</Label>
-            <Input type="number" placeholder="0" value={formData.sellPrice || ""} onChange={(e) => setFormData({ ...formData, sellPrice: Number(e.target.value) })} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Stock initial</Label>
-            <Input type="number" placeholder="0" value={formData.stock || ""} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })} />
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Seuil d'alerte stock</Label>
-          <Input type="number" placeholder="5" value={formData.minStock || ""} onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })} className="max-w-[200px]" />
-          <p className="text-[11px] text-muted-foreground">Vous serez alerté quand le stock descend sous ce seuil</p>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <AdminLayout title="Catalogue Produits" subtitle="Gérez votre inventaire de pièces détachées">
       {/* Header Actions */}
@@ -472,7 +489,15 @@ export default function Products() {
             <DialogTitle className="flex items-center gap-2"><Plus className="w-5 h-5 text-primary" />Nouveau produit</DialogTitle>
             <DialogDescription>Ajoutez une pièce détachée au catalogue</DialogDescription>
           </DialogHeader>
-          <ProductFormFields />
+          <ProductFormFields 
+            formData={formData}
+            setFormData={setFormData}
+            previewImage={previewImage}
+            setPreviewImage={setPreviewImage}
+            fileInputRef={fileInputRef}
+            handleImageUpload={handleImageUpload}
+            categories={categories}
+          />
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} asChild={false}>Annuler</Button>
             <Button className="gradient-primary text-primary-foreground" onClick={handleAdd} asChild={false}>Ajouter le produit</Button>
@@ -487,7 +512,15 @@ export default function Products() {
             <DialogTitle className="flex items-center gap-2"><Edit className="w-5 h-5 text-primary" />Modifier le produit</DialogTitle>
             <DialogDescription>Modifiez les informations du produit</DialogDescription>
           </DialogHeader>
-          <ProductFormFields />
+          <ProductFormFields 
+            formData={formData}
+            setFormData={setFormData}
+            previewImage={previewImage}
+            setPreviewImage={setPreviewImage}
+            fileInputRef={fileInputRef}
+            handleImageUpload={handleImageUpload}
+            categories={categories}
+          />
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} asChild={false}>Annuler</Button>
             <Button className="gradient-primary text-primary-foreground" onClick={handleEdit} asChild={false}>Enregistrer</Button>

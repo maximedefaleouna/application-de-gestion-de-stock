@@ -210,7 +210,7 @@ export default function Sales() {
                 >
                   <TableCell>
                     <span className="font-semibold text-foreground">
-                      {sale.id}
+                      {sale.formattedVenteNumber || sale.id}
                     </span>
                   </TableCell>
                   <TableCell>

@@ -18,7 +18,9 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Desktop sidebar */}
       <div className="hidden lg:block">
-        <AdminSidebar />
+        <AdminSidebar onNavigate={function (): void {
+          throw new Error("Function not implemented.");
+        } } />
       </div>
 
       {/* Mobile sidebar */}

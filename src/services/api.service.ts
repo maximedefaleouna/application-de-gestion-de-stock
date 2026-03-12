@@ -165,6 +165,8 @@ const mapBackendSaleToFrontend = (sale: any) => ({
   articles: sale?.articles,
   client: sale?.client,
   vendeur: sale?.vendeur,
+  formattedVenteNumber: sale?.formattedVenteNumber,
+  venteNumber: sale?.venteNumber,
 });
 
 const mapBackendUserToFrontend = (user: any) => ({
@@ -209,7 +211,10 @@ export const authService = {
     return withMappedData(response.data, mapBackendUserToFrontend(profile));
   },
   changePassword: async (oldPassword: string, newPassword: string) => {
-    const response = await api.put<ApiResponse<any>>("/auth/change-password", { oldPassword, newPassword });
+    const response = await api.put<ApiResponse<any>>("/auth/change-password", { 
+      oldPassword: oldPassword, 
+      newPassword: newPassword 
+    });
     return response.data;
   },
   createUser: async (data: RegisterData | any) => {
@@ -458,6 +463,55 @@ export const mouvementStockService = {
   },
   delete: async (id: string) => {
     const response = await api.delete<ApiResponse<any> | { data: any }>(`/mouvements-stock/${id}`);
+    return response.data;
+  },
+};
+
+export const dashboardService = {
+  getDashboard: async (startDate?: string, endDate?: string) => {
+    const params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    
+    const response = await api.get<ApiResponse<any>>("/dashboard", { params });
+    return response.data;
+  },
+  getStatistiques: async (startDate?: string, endDate?: string) => {
+    const params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    
+    const response = await api.get<ApiResponse<any>>("/statistiques", { params });
+    return response.data;
+  },
+};
+
+export interface PaymentData {
+  clientId: string;
+  venteId: string;
+  montant: number;
+  modePaiement: "espece" | "mobile_money" | "carte" | "credit";
+}
+
+export const paiementCreditService = {
+  getAll: async () => {
+    const response = await api.get<ApiResponse<any[]>>("/paiements-credit");
+    return response.data;
+  },
+  getAllDebts: async () => {
+    const response = await api.get<ApiResponse<any[]>>("/paiements-credit/all");
+    return response.data;
+  },
+  getClientDebts: async (clientId: string) => {
+    const response = await api.get<ApiResponse<any>>(`/paiements-credit/client/${clientId}`);
+    return response.data;
+  },
+  createPayment: async (data: PaymentData) => {
+    const response = await api.post<ApiResponse<any>>("/paiements-credit", data);
+    return response.data;
+  },
+  deletePayment: async (id: string) => {
+    const response = await api.delete<ApiResponse<any>>(`/paiements-credit/${id}`);
     return response.data;
   },
 };

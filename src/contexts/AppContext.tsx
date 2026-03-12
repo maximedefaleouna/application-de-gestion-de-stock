@@ -11,6 +11,7 @@ import {
   clientService,
   venteService,
   categorieService,
+  configurationService,
 } from "@/services/api.service";
 import { toast } from "sonner";
 
@@ -23,6 +24,16 @@ interface User {
   avatar: string;
 }
 
+interface Configuration {
+  id: string;
+  nom: string;
+  nomChef: string;
+  prenomChef: string;
+  adresse: string;
+  telephone: string;
+  email: string;
+}
+
 interface AppContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -31,6 +42,7 @@ interface AppContextType {
   clients: any[];
   categories: any[];
   ventes: any[];
+  configuration: Configuration | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   registerUser: (data: any) => Promise<void>;
@@ -44,6 +56,7 @@ interface AppContextType {
   deleteClient: (id: string) => Promise<void>;
   fetchCategories: () => Promise<void>;
   fetchVentes: () => Promise<void>;
+  fetchConfiguration: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -55,6 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [ventes, setVentes] = useState<any[]>([]);
+  const [configuration, setConfiguration] = useState<Configuration | null>(null);
 
   // Vérifier si l'utilisateur est connecté au montage
   useEffect(() => {
@@ -63,6 +77,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     if (storedUser && token) {
       setUser(JSON.parse(storedUser));
+      fetchConfiguration();
     }
     setIsLoading(false);
   }, []);
@@ -239,6 +254,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Récupérer la configuration
+  const fetchConfiguration = async () => {
+    try {
+      const response = await configurationService.get();
+      setConfiguration(response.data);
+    } catch (error: any) {
+      console.error("Erreur chargement configuration:", error);
+      // Don't show error if config doesn't exist yet (404)
+      if (error.response?.status !== 404) {
+        toast.error("Erreur de chargement de la configuration");
+      }
+    }
+  };
+
   const value: AppContextType = {
     user,
     isAuthenticated: !!user,
@@ -247,6 +276,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     clients,
     categories,
     ventes,
+    configuration,
     login,
     logout,
     registerUser,
@@ -260,6 +290,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deleteClient,
     fetchCategories,
     fetchVentes,
+    fetchConfiguration,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

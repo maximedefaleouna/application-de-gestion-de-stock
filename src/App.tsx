@@ -17,6 +17,8 @@ import Notifications from "./pages/Notifications";
 import Stats from "./pages/Stats";
 import Configuration from "./pages/Configuration";
 import Receipt from "./pages/Receipt";
+import DebtPayments from "./pages/DebtPayments";
+import ClientDebtDetail from "./pages/ClientDebtDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -90,6 +92,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Clients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/debt-payments"
+            element={
+              <ProtectedRoute>
+                <DebtPayments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/client-debt-detail/:clientId"
+            element={
+              <ProtectedRoute>
+                <ClientDebtDetail />
               </ProtectedRoute>
             }
           />

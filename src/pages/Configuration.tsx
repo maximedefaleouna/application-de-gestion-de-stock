@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import {
   Card,
@@ -21,22 +21,53 @@ import {
   MapPin,
   Store,
 } from "lucide-react";
+import { configurationService } from "@/services/api.service";
 
 export default function Configuration() {
-  // Mock data - pas de connexion API
   const [config, setConfig] = useState({
-    nom: "Ma Boutique",
-    nomChef: "Dupont",
-    prenomChef: "Jean",
-    adresse: "123 Avenue du Commerce",
-    telephone: "0612345678",
-    email: "contact@boutique.com",
+    nom: "",
+    nomChef: "",
+    prenomChef: "",
+    adresse: "",
+    telephone: "",
+    email: "",
   });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = () => {
-    // Mock save - pas d'appel API réel
-    toast.success("Configuration enregistrée avec succès !");
-    console.log("Configuration sauvegardée:", config);
+  useEffect(() => {
+    loadConfiguration();
+  }, []);
+
+  const loadConfiguration = async () => {
+    try {
+      setIsLoading(true);
+      const response = await configurationService.get();
+      if (response.data) {
+        setConfig(response.data);
+      }
+    } catch (error: any) {
+      console.error("Erreur chargement configuration:", error);
+      // Don't show error if config doesn't exist yet
+      if (error.response?.status !== 404) {
+        toast.error("Erreur de chargement de la configuration");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      await configurationService.save(config);
+      toast.success("Configuration enregistrée avec succès !");
+      // Reload to ensure we have the latest data
+      loadConfiguration();
+    } catch (error: any) {
+      console.error("Erreur sauvegarde:", error);
+      toast.error(
+        error.response?.data?.error || "Erreur lors de l'enregistrement"
+      );
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -171,23 +202,28 @@ export default function Configuration() {
             variant="outline"
             onClick={() => {
               setConfig({
-                nom: "Ma Boutique",
-                nomChef: "Dupont",
-                prenomChef: "Jean",
-                adresse: "123 Avenue du Commerce",
-                telephone: "0612345678",
-                email: "contact@boutique.com",
+                nom: "",
+                nomChef: "",
+                prenomChef: "",
+                adresse: "",
+                telephone: "",
+                email: "",
               });
-              toast.info("Configuration réinitialisée");
+              toast.info("Formulaire réinitialisé");
             }}
             asChild={false}
           >
             Réinitialiser
           </Button>
 
-          <Button onClick={handleSave} className="gap-2" asChild={false}>
+          <Button 
+            onClick={handleSave} 
+            className="gap-2" 
+            disabled={isLoading}
+            asChild={false}
+          >
             <Save className="w-4 h-4" />
-            Enregistrer la configuration
+            {isLoading ? "Chargement..." : "Enregistrer la configuration"}
           </Button>
         </div>
 
@@ -206,8 +242,8 @@ export default function Configuration() {
             </ul>
             <Separator className="my-3" />
             <p className="text-xs italic">
-              Note: Cette page est une maquette. La sauvegarde n'est pas
-              connectée à l'API.
+              Les informations sont enregistrées dans la base de données et 
+              utilisées pour personnaliser votre système.
             </p>
           </CardContent>
         </Card>

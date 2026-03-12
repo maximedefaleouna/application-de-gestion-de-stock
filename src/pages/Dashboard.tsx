@@ -13,8 +13,9 @@ import {
   Package,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { venteService, produitService } from "@/services/api.service";
+import { dashboardService } from "@/services/api.service";
 import { toast } from "sonner";
+import { startOfDay, endOfDay } from "date-fns";
 
 const formatCFA = (amount: number) => amount.toLocaleString("fr-FR") + " F";
 
@@ -36,8 +37,8 @@ export default function Dashboard() {
     from: Date | undefined;
     to: Date | undefined;
   }>({
-    from: new Date(),
-    to: new Date(),
+    from: startOfDay(new Date()),
+    to: endOfDay(new Date()),
   });
   const [currentPeriod, setCurrentPeriod] = useState<DateRangeType>("today");
   const [stats, setStats] = useState<DashboardStats>({
@@ -59,41 +60,33 @@ export default function Dashboard() {
     try {
       setIsLoading(true);
 
-      // Charger les ventes du jour
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Formater les dates correctement en tenant compte du fuseau horaire local
+      const formatDateToLocal = (date: Date | undefined) => {
+        if (!date) return undefined;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
 
-      const [ventesResponse, lowStockResponse] = await Promise.all([
-        venteService.getAll({
-          startDate: today.toISOString().split("T")[0],
-          endDate: new Date().toISOString().split("T")[0],
-        }),
-        produitService.getLowStock(),
-      ]);
+      const startDate = formatDateToLocal(dateRange.from);
+      const endDate = formatDateToLocal(dateRange.to);
 
-      const ventesData = ventesResponse.data || [];
+      // Appeler la nouvelle API dashboard
+      const dashboardResponse = await dashboardService.getDashboard(startDate, endDate);
+      const dashboardData = dashboardResponse.data;
 
-      // Calculer les stats
-      const todaySalesCount = ventesData.length;
-      const todayRevenueTotal = ventesData.reduce(
-        (sum: number, v: any) => sum + (v.montantTotal || 0),
-        0,
-      );
+      if (dashboardData) {
+        setStats({
+          totalVentes: dashboardData.summary.totalVentes || 0,
+          todaySales: dashboardData.summary.totalVentes || 0,
+          todayRevenue: dashboardData.summary.totalRevenue || 0,
+          lowStockCount: dashboardData.lowStockProducts?.length || 0,
+          pendingCredits: dashboardData.summary.pendingCredits || 0,
+        });
 
-      // Compter les crédits en cours
-      const pendingCreditsTotal = ventesData
-        .filter((v: any) => v.estCredit && v.statut !== "completee")
-        .reduce((sum: number, v: any) => sum + (v.montantRestant || 0), 0);
-
-      setStats({
-        totalVentes: ventesData.length,
-        todaySales: todaySalesCount,
-        todayRevenue: todayRevenueTotal,
-        lowStockCount: lowStockResponse.data.length || 0,
-        pendingCredits: pendingCreditsTotal,
-      });
-
-      setLowStockProducts(lowStockResponse.data || []);
+        setLowStockProducts(dashboardData.lowStockProducts || []);
+      }
     } catch (error) {
       console.error("Erreur chargement dashboard:", error);
       toast.error("Erreur de chargement des données du tableau de bord", {
@@ -119,6 +112,78 @@ export default function Dashboard() {
   ) => {
     setCurrentPeriod(period);
     setDateRange(range);
+    
+    // Recharger les données avec la NOUVELLE période (en utilisant range directement)
+    loadDashboardDataWithRange(range);
+  };
+
+  const loadDashboardDataWithRange = (range: CustomDateRange) => {
+    try {
+      setIsLoading(true);
+
+      // Formater les dates correctement en tenant compte du fuseau horaire local
+      const formatDateToLocal = (date: Date | undefined) => {
+        if (!date) return undefined;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const startDate = formatDateToLocal(range.from);
+      const endDate = formatDateToLocal(range.to);
+
+      console.log('Dashboard - Période sélectionnée:', { startDate, endDate, range });
+
+      // Appeler la nouvelle API dashboard
+      dashboardService.getDashboard(startDate, endDate)
+        .then((dashboardResponse) => {
+          const dashboardData = dashboardResponse.data;
+
+          if (dashboardData) {
+            setStats({
+              totalVentes: dashboardData.summary.totalVentes || 0,
+              todaySales: dashboardData.summary.totalVentes || 0,
+              todayRevenue: dashboardData.summary.totalRevenue || 0,
+              lowStockCount: dashboardData.lowStockProducts?.length || 0,
+              pendingCredits: dashboardData.summary.pendingCredits || 0,
+            });
+
+            setLowStockProducts(dashboardData.lowStockProducts || []);
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur chargement dashboard:", error);
+          toast.error("Erreur de chargement des données du tableau de bord", {
+            duration: 5000,
+          });
+          setStats({
+            totalVentes: 0,
+            todaySales: 0,
+            todayRevenue: 0,
+            lowStockCount: 0,
+            pendingCredits: 0,
+          });
+          setLowStockProducts([]);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } catch (error) {
+      console.error("Erreur chargement dashboard:", error);
+      toast.error("Erreur de chargement des données du tableau de bord", {
+        duration: 5000,
+      });
+      setStats({
+        totalVentes: 0,
+        todaySales: 0,
+        todayRevenue: 0,
+        lowStockCount: 0,
+        pendingCredits: 0,
+      });
+      setLowStockProducts([]);
+      setIsLoading(false);
+    }
   };
 
   return (

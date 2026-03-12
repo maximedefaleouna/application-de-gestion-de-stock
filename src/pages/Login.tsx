@@ -163,7 +163,7 @@ export default function Login() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  placeholder="password"
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
@@ -224,17 +224,7 @@ export default function Login() {
               )}
             </Button>
 
-            <p className="text-xs text-center text-muted-foreground">
-              Identifiants par défaut (après création par un admin) :
-              <br />
-              <span className="font-mono bg-muted px-2 py-0.5 rounded">
-                admin@autopiecesplus.com
-              </span>{" "}
-              /{" "}
-              <span className="font-mono bg-muted px-2 py-0.5 rounded">
-                123456
-              </span>
-            </p>
+
           </CardFooter>
         </form>
       </Card>

@@ -34,6 +34,7 @@ import {
   Printer,
   CreditCard,
   User,
+  Package,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -271,8 +272,8 @@ export default function POS() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 text-xs">
-                          No Image
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="w-6 h-6 text-muted-foreground/30" />
                         </div>
                       )}
                     </div>
