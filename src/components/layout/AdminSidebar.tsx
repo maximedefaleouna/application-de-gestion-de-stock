@@ -12,6 +12,7 @@
   Wrench,
   User,
   DollarSign,
+  Activity,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ const navItems = [
   { title: "Utilisateurs", url: "/users", icon: Users },
   { title: "Alertes", url: "/notifications", icon: Bell },
   { title: "Statistiques", url: "/stats", icon: BarChart3 },
+  { title: "Historique", url: "/historique", icon: Activity },
   { title: "Configuration", url: "/configuration", icon: Settings },
 ];
 
@@ -42,8 +44,26 @@ interface AdminSidebarProps {
 export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { configuration } = useApp();
+  const { configuration, user } = useApp();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const isAdmin = user?.role === 'admin';
+
+  // Menu items filtered by role
+  const visibleNavItems = navItems.filter((item) => {
+    // Admin sees everything
+    if (isAdmin) return true;
+    
+    // Vendeur sees only these pages
+    const vendeurAllowed = [
+      '/sales',           // Point de vente
+      '/clients',         // Clients & Credits
+      '/debt-payments',   // Paiement Dettes
+      '/notifications',   // Alertes
+    ];
+    
+    return vendeurAllowed.includes(item.url);
+  });
 
   useEffect(() => {
     loadUnreadCount();
@@ -84,7 +104,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
 
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
         <ul className="space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = location.pathname === item.url;
             return (
               <li key={item.title}>

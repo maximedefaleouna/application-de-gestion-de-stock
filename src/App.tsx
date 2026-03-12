@@ -19,6 +19,7 @@ import Configuration from "./pages/Configuration";
 import Receipt from "./pages/Receipt";
 import DebtPayments from "./pages/DebtPayments";
 import ClientDebtDetail from "./pages/ClientDebtDetail";
+import Historique from "./pages/Historique";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,7 +43,7 @@ const App = () => (
           <Route
             path="/"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -50,7 +51,7 @@ const App = () => (
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -58,7 +59,7 @@ const App = () => (
           <Route
             path="/sales"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <Sales />
               </ProtectedRoute>
             }
@@ -66,7 +67,7 @@ const App = () => (
           <Route
             path="/pos"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <POS />
               </ProtectedRoute>
             }
@@ -74,7 +75,7 @@ const App = () => (
           <Route
             path="/products"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute adminOnly>
                 <Products />
               </ProtectedRoute>
             }
@@ -82,7 +83,7 @@ const App = () => (
           <Route
             path="/stock"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute adminOnly>
                 <Stock />
               </ProtectedRoute>
             }
@@ -90,7 +91,7 @@ const App = () => (
           <Route
             path="/clients"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <Clients />
               </ProtectedRoute>
             }
@@ -98,7 +99,7 @@ const App = () => (
           <Route
             path="/debt-payments"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <DebtPayments />
               </ProtectedRoute>
             }
@@ -106,7 +107,7 @@ const App = () => (
           <Route
             path="/client-debt-detail/:clientId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <ClientDebtDetail />
               </ProtectedRoute>
             }
@@ -114,7 +115,7 @@ const App = () => (
           <Route
             path="/users"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute adminOnly>
                 <Users />
               </ProtectedRoute>
             }
@@ -122,7 +123,7 @@ const App = () => (
           <Route
             path="/notifications"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'vendeur']}>
                 <Notifications />
               </ProtectedRoute>
             }
@@ -130,7 +131,7 @@ const App = () => (
           <Route
             path="/stats"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute adminOnly>
                 <Stats />
               </ProtectedRoute>
             }
@@ -138,7 +139,7 @@ const App = () => (
           <Route
             path="/configuration"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute adminOnly>
                 <Configuration />
               </ProtectedRoute>
             }
@@ -148,6 +149,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Receipt />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/historique"
+            element={
+              <ProtectedRoute adminOnly>
+                <Historique />
               </ProtectedRoute>
             }
           />
