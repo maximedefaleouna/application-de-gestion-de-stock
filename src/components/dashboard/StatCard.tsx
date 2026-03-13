@@ -47,7 +47,7 @@ export function StatCard({
       <div className="flex items-start justify-between">
         <div className="space-y-1 md:space-y-2 min-w-0 flex-1">
           <p className="text-xs md:text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-xl md:text-3xl font-bold text-foreground truncate">{value}</p>
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground whitespace-nowrap overflow-x-auto">{value}</p>
           {trend !== undefined && (
             <div className="flex items-center gap-1">
               {isPositive ? (

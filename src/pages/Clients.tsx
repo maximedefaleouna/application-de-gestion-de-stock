@@ -185,8 +185,10 @@ export default function Clients() {
         </Button>
       </div>
 
+      {/* Responsive Table */}
       <div className="bg-card rounded-xl border shadow-card overflow-hidden">
-        <Table>
+        <div className="overflow-x-auto">
+          <Table>
           <TableHeader>
             <TableRow className="bg-secondary/50">
               <TableHead>Client</TableHead>
@@ -280,6 +282,7 @@ export default function Clients() {
             })}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {/* Add Client Dialog */}

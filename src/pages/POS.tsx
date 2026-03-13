@@ -235,19 +235,24 @@ export default function POS() {
 
   return (
     <AdminLayout title="Point de Vente" subtitle="Effectuez une nouvelle vente">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
+      {/* Main Container - Full width control */}
+      <div className="w-full max-w-[100vw] overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6 px-2 sm:px-4 md:px-6">
+        {/* Products Section */}
+        <div className="lg:col-span-2 space-y-3 md:space-y-4">
+          {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Rechercher un produit par nom ou référence..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 w-full"
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {/* Products Grid - Responsive */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
             {isLoading ? (
               <p className="text-sm text-muted-foreground col-span-full text-center py-8">
                 Chargement des produits...
@@ -260,11 +265,12 @@ export default function POS() {
               filteredProducts.slice(0, 12).map((product) => (
                 <Card
                   key={product.id}
-                  className="p-3 cursor-pointer hover:shadow-lg hover:border-primary transition-all"
+                  className="p-3 cursor-pointer hover:shadow-lg hover:border-primary transition-all min-h-[100px]"
                   onClick={() => addToCart(product)}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
+                  <div className="flex items-start gap-2 md:gap-3">
+                    {/* Product Image */}
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
@@ -273,19 +279,20 @@ export default function POS() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package className="w-6 h-6 text-muted-foreground/30" />
+                          <Package className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground/30" />
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground text-sm truncate">
+                    {/* Product Info */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="font-semibold text-foreground text-xs sm:text-sm truncate break-words leading-tight">
                         {product.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                         {product.reference}
                       </p>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="font-bold text-primary text-sm">
+                      <div className="flex items-center justify-between gap-2 mt-1">
+                        <span className="font-bold text-primary text-xs sm:text-sm whitespace-nowrap">
                           {formatCFA(product.sellPrice)}
                         </span>
                         <Badge
@@ -294,9 +301,9 @@ export default function POS() {
                               ? "warning"
                               : "success"
                           }
-                          className="text-[10px]"
+                          className="text-[9px] sm:text-[10px] px-1.5 py-0.5 min-w-[40px] text-center"
                         >
-                          {product.stock}
+                          Stock: {product.stock}
                         </Badge>
                       </div>
                     </div>
@@ -307,12 +314,13 @@ export default function POS() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <ShoppingCart className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Panier</h3>
-              <Badge variant="secondary" className="ml-auto">
+        {/* Cart Section - Sticky on desktop */}
+        <div className="space-y-3 md:space-y-4 lg:sticky lg:top-4">
+          <Card className="p-3 md:p-4">
+            <div className="flex items-center gap-2 mb-3 md:mb-4">
+              <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+              <h3 className="font-semibold text-foreground text-sm md:text-base">Panier</h3>
+              <Badge variant="secondary" className="ml-auto text-xs">
                 {cart.length} articles
               </Badge>
             </div>
@@ -322,17 +330,17 @@ export default function POS() {
                 Cliquez sur un produit pour l'ajouter
               </p>
             ) : (
-              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+              <div className="space-y-2 md:space-y-3 max-h-[280px] sm:max-h-[350px] overflow-y-auto">
                 {cart.map((item) => (
                   <div
                     key={item.productId}
-                    className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30"
+                    className="flex items-center gap-1.5 md:gap-2 p-2 rounded-lg bg-secondary/30"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
+                      <p className="font-medium text-xs md:text-sm truncate break-words leading-tight">
                         {item.productName}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] md:text-xs text-muted-foreground">
                         {formatCFA(item.unitPrice)}
                       </p>
                     </div>
@@ -340,32 +348,32 @@ export default function POS() {
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-7 w-7"
+                        className="h-6 w-6 md:h-7 md:w-7"
                         onClick={() => updateQuantity(item.productId, -1)}
                         asChild={false}
                       >
                         <Minus className="w-3 h-3" />
                       </Button>
-                      <span className="w-8 text-center font-bold text-sm">
+                      <span className="w-6 md:w-8 text-center font-bold text-xs md:text-sm">
                         {item.quantity}
                       </span>
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-7 w-7"
+                        className="h-6 w-6 md:h-7 md:w-7"
                         onClick={() => updateQuantity(item.productId, 1)}
                         asChild={false}
                       >
                         <Plus className="w-3 h-3" />
                       </Button>
                     </div>
-                    <span className="font-bold text-sm w-20 text-right">
+                    <span className="font-bold text-xs md:text-sm w-14 md:w-20 text-right whitespace-nowrap">
                       {formatCFA(item.unitPrice * item.quantity)}
                     </span>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-destructive"
+                      className="h-6 w-6 md:h-7 md:w-7 text-destructive flex-shrink-0"
                       onClick={() => removeFromCart(item.productId)}
                       asChild={false}
                     >
@@ -376,10 +384,11 @@ export default function POS() {
               </div>
             )}
 
-            <div className="border-t mt-4 pt-4 space-y-3">
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total</span>
-                <span className="text-primary">{formatCFA(total)}</span>
+            <div className="border-t mt-3 md:mt-4 pt-3 md:pt-4 space-y-2 md:space-y-3">
+              {/* Total Display - Large and Clear */}
+              <div className="flex justify-between items-center text-base md:text-lg font-bold py-2">
+                <span className="text-foreground">Total</span>
+                <span className="text-primary text-lg md:text-xl">{formatCFA(total)}</span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -448,7 +457,7 @@ export default function POS() {
               )}
 
               <Button
-                className="w-full gradient-primary text-primary-foreground shadow-glow"
+                className="w-full gradient-primary text-primary-foreground shadow-glow h-10 md:h-11 text-sm md:text-base"
                 onClick={handleSale}
                 disabled={cart.length === 0}
                 asChild={false}
@@ -459,6 +468,7 @@ export default function POS() {
             </div>
           </Card>
         </div>
+      </div>
       </div>
 
       <Dialog open={isReceiptOpen} onOpenChange={setIsReceiptOpen}>

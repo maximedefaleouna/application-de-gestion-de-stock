@@ -16,32 +16,27 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop sidebar */}
-      <div className="hidden lg:block">
-        <AdminSidebar onNavigate={function (): void {
-          throw new Error("Function not implemented.");
-        } } />
-      </div>
-
-      {/* Mobile sidebar */}
+      {/* Sidebar - Sheet/Drawer for ALL screen sizes */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-64 bg-sidebar border-sidebar-border">
+        <SheetContent side="left" className="p-0 w-72 bg-sidebar border-sidebar-border">
           <AdminSidebar onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      <div className="lg:ml-64">
+      {/* Main content area */}
+      <div className="flex flex-col min-h-screen">
         <AdminHeader title={title} subtitle={subtitle}>
+          {/* Hamburger menu button - Always visible */}
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden mr-2"
+            className="mr-2 h-9 w-9 lg:h-10 lg:w-10"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5 lg:w-6 lg:h-6" />
           </Button>
         </AdminHeader>
-        <main className="p-4 md:p-6">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden">
           {children}
         </main>
       </div>

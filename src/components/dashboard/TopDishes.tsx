@@ -66,13 +66,13 @@ export function TopProducts() {
             return (
               <div key={product.name} className="animate-slide-up" style={{ animationDelay: `${index * 0.05}s` }}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full gradient-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="w-6 h-6 rounded-full gradient-primary text-primary-foreground text-xs font-bold flex items-center justify-center flex-shrink-0">
                       {index + 1}
                     </span>
-                    <span className="font-medium text-foreground">{product.name}</span>
+                    <span className="font-medium text-foreground truncate">{product.name}</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">{product.count} ventes</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap ml-2">{product.count} ventes</span>
                 </div>
                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
                   <div

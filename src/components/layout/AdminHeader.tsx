@@ -48,38 +48,42 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 md:px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
+    <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-3 sm:px-4 md:px-6 py-3 md:py-4">
+      <div className="flex items-center justify-between w-full max-w-[100vw] overflow-hidden">
+        {/* Left Section - Title */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           {children}
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">{title}</h1>
-            {subtitle && <p className="text-xs md:text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-xl md:text-2xl font-bold text-foreground truncate">{title}</h1>
+            {subtitle && <p className="text-xs md:text-sm text-muted-foreground mt-0.5 truncate hidden sm:block">{subtitle}</p>}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="relative hidden md:block">
+        {/* Right Section - Actions */}
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
+          {/* Search - Desktop Only */}
+          <div className="relative hidden lg:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Rechercher un produit, client..."
-              className="w-64 pl-10 bg-secondary/50 border-transparent focus:border-primary"
+              placeholder="Rechercher..."
+              className="w-48 xl:w-64 pl-10 bg-secondary/50 border-transparent focus:border-primary text-sm"
             />
           </div>
 
+          {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center animate-pulse-soft">
-                    {unreadCount}
+                  <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-destructive text-destructive-foreground text-[10px] sm:text-xs rounded-full flex items-center justify-center animate-pulse-soft">
+                    {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuContent align="end" className="w-72 sm:w-80 max-w-[90vw]">
               <DropdownMenuLabel className="flex items-center justify-between" inset={false}>
                 Alertes
                 <Badge variant="secondary">{unreadCount} nouvelles</Badge>
@@ -100,21 +104,20 @@ export function AdminHeader({ title, subtitle, children }: AdminHeaderProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 px-2">
-                <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
-                  <User className="w-4 h-4 text-primary-foreground" />
+              <Button variant="ghost" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 h-9 sm:h-10">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-foreground" />
                 </div>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">{`${currentUser.prenom || ""} ${currentUser.nom || ""}`.trim() || "Utilisateur"}</p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {currentUser.role === "admin" ? "Administrateur" : "Vendeur"}
-                  </p>
+                <div className="hidden lg:block text-left min-w-0">
+                  <p className="text-xs sm:text-sm font-medium truncate max-w-[120px] xl:max-w-none">{`${currentUser.prenom || ""} ${currentUser.nom || ""}`.trim() || "Utilisateur"}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground capitalize truncate">{currentUser.role === "admin" ? "Administrateur" : "Vendeur"}</p>
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 max-w-[90vw]">
               <DropdownMenuLabel inset={false}>Mon compte</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/profile")} inset={false}>

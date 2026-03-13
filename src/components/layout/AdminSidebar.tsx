@@ -90,20 +90,21 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col lg:flex">
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
+      {/* Logo/Header - Compact */}
+      <div className="flex items-center gap-2 px-4 py-4 border-b border-sidebar-border">
+        <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow flex-shrink-0">
           <Wrench className="w-5 h-5 text-primary-foreground" />
         </div>
-        <div>
-          <h1 className="text-lg font-bold text-sidebar-foreground">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-base font-bold text-sidebar-foreground truncate">
             {configuration?.nom || "Pieces Shop"}
           </h1>
-          <p className="text-xs text-sidebar-muted">Gestion Boutique</p>
+          <p className="text-[10px] text-sidebar-muted truncate">Gestion Boutique</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 overflow-y-auto">
-        <ul className="space-y-1">
+      <nav className="flex-1 px-2 py-3 overflow-y-auto">
+        <ul className="space-y-0.5">
           {visibleNavItems.map((item) => {
             const isActive = location.pathname === item.url;
             return (
@@ -118,11 +119,11 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   )}
                 >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.title}</span>
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="truncate">{item.title}</span>
                   {item.title === "Alertes" && unreadCount > 0 && (
-                    <div className="ml-auto flex items-center justify-center w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full font-semibold">
-                      {unreadCount > 99 ? '99+' : unreadCount}
+                    <div className="ml-auto flex items-center justify-center w-5 h-5 bg-destructive text-destructive-foreground text-[10px] rounded-full font-semibold flex-shrink-0">
+                      {unreadCount > 9 ? '9+' : unreadCount}
                     </div>
                   )}
                 </NavLink>

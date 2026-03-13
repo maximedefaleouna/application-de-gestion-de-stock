@@ -302,3 +302,64 @@
     background: transparent !important;
   }
 }
+
+/* ==========================================
+   CRITICAL RESPONSIVE FIXES - ALL SCREENS
+   ========================================== */
+
+/* Prevent horizontal scroll on ANY screen size */
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  min-width: 320px;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Force all containers to be responsive */
+div, section, article, main {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+/* Text elements should never overflow */
+p, span, h1, h2, h3, h4, h5, h6, label {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Tables must scroll horizontally on mobile */
+table {
+  max-width: 100%;
+}
+
+/* Images always fit their container */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Buttons and inputs responsive */
+button, input, select, textarea {
+  max-width: 100%;
+}
+
+/* Badge and tags should wrap */
+[class*="badge"], [class*="tag"] {
+  white-space: nowrap;
+}
+
+/* On very small screens, adjust font sizes */
+@media (max-width: 374px) {
+  html {
+    font-size: 14px;
+  }
+  
+  h1 { font-size: 1.25rem; }
+  h2 { font-size: 1.1rem; }
+  h3 { font-size: 1rem; }
+}

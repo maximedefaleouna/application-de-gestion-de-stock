@@ -88,8 +88,8 @@ export function RecentSales() {
                 </div>
               </div>
 
-              <div className="text-right">
-                <p className="font-semibold text-foreground">{formatCFA(sale.totalAmount)}</p>
+              <div className="text-right min-w-[100px]">
+                <p className="font-semibold text-foreground whitespace-nowrap">{formatCFA(sale.totalAmount)}</p>
                 <p className="text-xs text-muted-foreground">
                   {sale.items?.length || 0} article{(sale.items?.length || 0) > 1 ? "s" : ""}
                 </p>
