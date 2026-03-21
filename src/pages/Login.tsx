@@ -53,7 +53,17 @@ export default function Login() {
         duration: 3000,
       });
 
-      navigate("/dashboard");
+      // Redirection selon le rôle
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      
+      if (user?.role === "vendeur") {
+        // Vendeur → Point de vente
+        navigate("/sales");
+      } else {
+        // Admin → Dashboard
+        navigate("/dashboard");
+      }
     } catch (err: any) {
       // Gestion détaillée des erreurs
       let errorMessage = "Erreur de connexion";
