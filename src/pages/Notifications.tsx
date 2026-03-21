@@ -46,7 +46,9 @@ export default function Notifications() {
     try {
       const response = await notificationService.getAll();
       setNotifications(response.data || []);
+      console.log('🔔 Notifications chargées:', response.data?.length || 0);
     } catch (error: any) {
+      console.error('Erreur chargement notifications:', error);
       toast.error(
         error.response?.data?.message ||
           error.response?.data?.error ||
@@ -58,6 +60,9 @@ export default function Notifications() {
 
   useEffect(() => {
     loadNotifications();
+    // Rafraîchir toutes les 10 secondes
+    const interval = setInterval(loadNotifications, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const markAsRead = async (id: string) => {
@@ -88,6 +93,35 @@ export default function Notifications() {
       toast.success("Notification supprimée");
     } catch {
       toast.error("Impossible de supprimer la notification");
+    }
+  };
+
+  const createTestNotification = async () => {
+    try {
+      // Créer une notification de test via l'API
+      const response = await fetch('/api/v1/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+        body: JSON.stringify({
+          type: 'systeme',
+          titre: '🧪 Test de notification',
+          message: `Ceci est un test créé à ${new Date().toLocaleString('fr-FR')}`,
+        }),
+      });
+      
+      if (response.ok) {
+        toast.success('Notification de test créée !');
+        await loadNotifications(); // Rafraîchir
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Erreur lors de la création');
+      }
+    } catch (error: any) {
+      console.error('Erreur création test:', error);
+      toast.error('Impossible de créer la notification de test');
     }
   };
 
@@ -141,15 +175,25 @@ export default function Notifications() {
             <Badge variant="default">{unreadCount} non lues</Badge>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={markAllAsRead}
-          asChild={false}
-        >
-          <CheckCheck className="w-4 h-4 mr-2" />
-          Tout marquer lu
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={createTestNotification}
+            asChild={false}
+          >
+            🧪 Test
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={markAllAsRead}
+            asChild={false}
+          >
+            <CheckCheck className="w-4 h-4 mr-2" />
+            Tout marquer lu
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">

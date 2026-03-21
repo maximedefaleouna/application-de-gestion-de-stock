@@ -341,6 +341,7 @@ export const venteService = {
           statut: toBackendStatus(data.status || (data.isCredit ? "credit" : "completed")),
           clientId: data.clientId || null,
           estCredit: Boolean(data.isCredit),
+          dateEcheance: data.dueDate || null,
           articles: (data.items || []).map((item: any) => ({
             produitId: item.productId,
             quantite: Number(item.quantity || 0),

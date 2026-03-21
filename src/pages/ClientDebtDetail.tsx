@@ -57,6 +57,9 @@ interface Sale {
   montantRestant: number;
   statut: string;
   createdAt: string;
+  dateEcheance?: string;
+  estEchu?: boolean;
+  joursRetard?: number;
   articles: Array<{
     produit: string;
     reference: string;
@@ -261,7 +264,7 @@ export default function ClientDebtDetail() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card className="p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
@@ -271,6 +274,22 @@ export default function ClientDebtDetail() {
               <p className="text-xs text-muted-foreground">Ventes en cours</p>
               <p className="text-xl font-bold">
                 {ventes.filter((v) => v.montantRestant > 0).length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className={`p-4 ${
+          ventes.some(v => v.estEchu) ? 'bg-destructive/10 border-destructive/50' : ''
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <AlertCircle className="w-5 h-5 text-destructive" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Crédits échus</p>
+              <p className="text-xl font-bold text-destructive">
+                {ventes.filter((v) => v.estEchu).length}
               </p>
             </div>
           </div>
@@ -334,7 +353,9 @@ export default function ClientDebtDetail() {
               filteredVentes.map((vente) => (
                 <div
                   key={vente.id}
-                  className="border rounded-lg p-4 bg-card hover:border-primary/50 transition-all"
+                  className={`border rounded-lg p-4 bg-card hover:border-primary/50 transition-all ${
+                    vente.estEchu ? 'border-destructive border-2 bg-destructive/5' : ''
+                  }`}
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
@@ -348,18 +369,43 @@ export default function ClientDebtDetail() {
                             locale: fr,
                           })}
                         </p>
+                        {vente.dateEcheance && (
+                          <p className={`text-xs mt-1 flex items-center gap-1 ${
+                            vente.estEchu ? 'text-destructive font-semibold' : 'text-muted-foreground'
+                          }`}>
+                            {vente.estEchu ? (
+                              <AlertCircle className="w-3 h-3" />
+                            ) : (
+                              <CheckCircle2 className="w-3 h-3" />
+                            )}
+                            Échéance: {format(new Date(vente.dateEcheance), "dd/MM/yyyy", { locale: fr })}
+                            {vente.estEchu && vente.joursRetard && vente.joursRetard > 0 && (
+                              <span className="text-destructive font-bold ml-1">
+                                ({vente.joursRetard} j de retard)
+                              </span>
+                            )}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <Badge
-                      variant={
-                        vente.statut === "completee" ? "default" : "destructive"
-                      }
-                    >
-                      {vente.statut === "completee" ? (
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                      ) : null}
-                      {vente.statut}
-                    </Badge>
+                    <div className="flex gap-2">
+                      {vente.estEchu && (
+                        <Badge variant="destructive" className="animate-pulse">
+                          <AlertCircle className="w-3 h-3 mr-1" />
+                          Retard
+                        </Badge>
+                      )}
+                      <Badge
+                        variant={
+                          vente.statut === "completee" ? "default" : "destructive"
+                        }
+                      >
+                        {vente.statut === "completee" ? (
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                        ) : null}
+                        {vente.statut}
+                      </Badge>
+                    </div>
                   </div>
 
                   {/* Articles */}

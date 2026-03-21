@@ -48,6 +48,7 @@ export default function POS() {
   const [paidAmount, setPaidAmount] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [dueDate, setDueDate] = useState<string>(""); // Date d'échéance pour crédit
 
   const [products, setProducts] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -160,8 +161,22 @@ export default function POS() {
       toast.error("Sélectionnez un client pour la vente à crédit !");
       return;
     }
+    if (isCredit && !dueDate) {
+      toast.error("Veuillez définir une date d'échéance pour le crédit !");
+      return;
+    }
     setIsReceiptOpen(true);
   };
+
+  // Définir une date par défaut quand on active le crédit
+  useEffect(() => {
+    if (isCredit && !dueDate) {
+      // Date par défaut: 30 jours
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 30);
+      setDueDate(defaultDate.toISOString().split('T')[0]);
+    }
+  }, [isCredit]);
 
   const finalizeSale = async () => {
     try {
@@ -181,6 +196,7 @@ export default function POS() {
             : "completed",
         clientId: isCredit ? selectedClientId : null,
         isCredit,
+        dueDate: isCredit && dueDate ? new Date(dueDate).toISOString() : null,
       });
 
       toast.success("Vente enregistrée avec succès !");
@@ -420,6 +436,26 @@ export default function POS() {
                       ))}
                     </SelectContent>
                   </Select>
+                  
+                  {/* Date d'échéance pour crédit */}
+                  <div className="space-y-2 mt-3">
+                    <Label className="flex items-center gap-1 text-warning-foreground">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Date d'échéance *
+                    </Label>
+                    <Input
+                      type="date"
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="border-warning/30 focus:border-warning"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Date limite de paiement par le client
+                    </p>
+                  </div>
                 </div>
               )}
 
