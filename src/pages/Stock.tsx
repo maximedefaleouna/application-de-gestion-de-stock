@@ -88,7 +88,7 @@ export default function Stock() {
   const lowStockCount = products.filter((p) => p.stock <= p.minStock).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
   const totalStockValue = products.reduce(
-    (acc, p) => acc + p.stock * p.buyPrice,
+    (acc, p) => acc + p.stock * p.sellPrice,
     0,
   );
 
@@ -259,7 +259,7 @@ export default function Stock() {
                 </TableCell>
                 <TableCell>
                   <span className="text-sm">
-                    {formatCFA(product.stock * product.buyPrice)}
+                    {formatCFA(product.stock * product.sellPrice)}
                   </span>
                 </TableCell>
                 <TableCell>

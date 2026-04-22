@@ -108,3 +108,10 @@ export interface DashboardStats {
   pendingCredits: number;
   topProducts: { name: string; count: number }[];
 }
+
+export interface Users {
+  nom: string;
+  prenom: string;
+  email : string;
+}
+

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ import {
   CreditCard,
   User,
   Package,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,6 +51,12 @@ export default function POS() {
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [dueDate, setDueDate] = useState<string>(""); // Date d'échéance pour crédit
+  
+  // Buyer information for non-credit sales
+  const [buyerName, setBuyerName] = useState<string>("");
+  const [buyerFirstName, setBuyerFirstName] = useState<string>("");
+  const [buyerPhone, setBuyerPhone] = useState<string>("+228");
+  const [phoneError, setPhoneError] = useState<string>("");
 
   const [products, setProducts] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -85,6 +93,22 @@ export default function POS() {
       (p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.reference.toLowerCase().includes(searchTerm.toLowerCase())),
   );
+
+  const validatePhone = (value: string | undefined) => {
+    if (!value) {
+      setPhoneError("Le numéro de téléphone est requis");
+      return false;
+    }
+
+    const phoneRegex = /^\+[1-9]\d{1,3}\d{6,14}$/;
+    if (!phoneRegex.test(value.replace(/\s/g, ""))) {
+      setPhoneError("Numéro de téléphone invalide. Exemple: +22877123456");
+      return false;
+    }
+
+    setPhoneError("");
+    return true;
+  };
 
   const addToCart = (product: any) => {
     const existing = cart.find((item) => item.productId === product.id);
@@ -165,6 +189,15 @@ export default function POS() {
       toast.error("Veuillez définir une date d'échéance pour le crédit !");
       return;
     }
+    // Validate buyer info for non-credit sales
+    if (!isCredit && !buyerName.trim()) {
+      toast.error("Veuillez saisir le nom de l'acheteur !");
+      return;
+    }
+    if (!isCredit && !validatePhone(buyerPhone)) {
+      toast.error("Veuillez saisir un numéro de téléphone valide !");
+      return;
+    }
     setIsReceiptOpen(true);
   };
 
@@ -197,6 +230,10 @@ export default function POS() {
         clientId: isCredit ? selectedClientId : null,
         isCredit,
         dueDate: isCredit && dueDate ? new Date(dueDate).toISOString() : null,
+        // Buyer information for non-credit sales
+        nomAcheteur: !isCredit ? buyerName : null,
+        prenomAcheteur: !isCredit ? buyerFirstName : null,
+        telephoneAcheteur: !isCredit ? buyerPhone : null,
       });
 
       toast.success("Vente enregistrée avec succès !");
@@ -205,6 +242,9 @@ export default function POS() {
       setIsCredit(false);
       setSelectedClientId("");
       setIsReceiptOpen(false);
+      setBuyerName("");
+      setBuyerFirstName("");
+      setBuyerPhone("");
       await loadData();
     } catch (error: any) {
       toast.error(
@@ -232,6 +272,9 @@ export default function POS() {
       `Mode  : ${paymentMethod === "cash" ? "Espèces" : paymentMethod === "mobile_money" ? "Mobile Money" : "Carte"}`,
       selectedClient
         ? `Client : ${selectedClient.nom || selectedClient.name}\nTel    : ${selectedClient.telephone || selectedClient.phone}`
+        : "",
+      !isCredit && (buyerName || buyerFirstName || buyerPhone)
+        ? `Acheteur : ${buyerFirstName} ${buyerName}\nTel      : ${buyerPhone}`
         : "",
     ]
       .filter(Boolean)
@@ -415,6 +458,46 @@ export default function POS() {
                 <Switch checked={isCredit} onCheckedChange={setIsCredit} />
               </div>
 
+              {/* Buyer information for non-credit sales */}
+              {!isCredit && (
+                <div className="space-y-2 mt-3">
+                  <Label className="flex items-center gap-1">
+                    <User className="w-3 h-3" />
+                    Informations de l'acheteur
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      placeholder="Nom"
+                      value={buyerName}
+                      onChange={(e) => setBuyerName(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Prénom"
+                      value={buyerFirstName}
+                      onChange={(e) => setBuyerFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <PhoneInput
+                      placeholder="77 123 45 67"
+                      value={buyerPhone}
+                      onChange={(value) => {
+                        setBuyerPhone(value);
+                        if (value) setPhoneError("");
+                      }}
+                      defaultCountry="TG"
+                      error={!!phoneError}
+                    />
+                    {phoneError && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        {phoneError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {isCredit && (
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1">
@@ -545,6 +628,12 @@ export default function POS() {
                   <div className="flex justify-between">
                     <span>Client</span>
                     <span>{selectedClient.nom || selectedClient.name}</span>
+                  </div>
+                )}
+                {!isCredit && (buyerName || buyerFirstName || buyerPhone) && (
+                  <div className="flex justify-between">
+                    <span>Acheteur</span>
+                    <span>{buyerFirstName} {buyerName} - {buyerPhone}</span>
                   </div>
                 )}
               </div>

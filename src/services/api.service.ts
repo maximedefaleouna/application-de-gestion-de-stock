@@ -167,6 +167,9 @@ const mapBackendSaleToFrontend = (sale: any) => ({
   vendeur: sale?.vendeur,
   formattedVenteNumber: sale?.formattedVenteNumber,
   venteNumber: sale?.venteNumber,
+  nomAcheteur: sale?.nomAcheteur,
+  prenomAcheteur: sale?.prenomAcheteur,
+  telephoneAcheteur: sale?.telephoneAcheteur,
 });
 
 const mapBackendUserToFrontend = (user: any) => ({
@@ -342,6 +345,9 @@ export const venteService = {
           clientId: data.clientId || null,
           estCredit: Boolean(data.isCredit),
           dateEcheance: data.dueDate || null,
+          nomAcheteur: data.nomAcheteur || null,
+          prenomAcheteur: data.prenomAcheteur || null,
+          telephoneAcheteur: data.telephoneAcheteur || null,
           articles: (data.items || []).map((item: any) => ({
             produitId: item.productId,
             quantite: Number(item.quantity || 0),

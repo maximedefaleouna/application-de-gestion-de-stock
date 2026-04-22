@@ -120,8 +120,12 @@ export default function Sales() {
 
   const filteredSales = sales.filter((sale) => {
     const clientName = (sale.clientName || "").toLowerCase();
+    const buyerName = `${sale.prenomAcheteur || ''} ${sale.nomAcheteur || ''}`.toLowerCase();
+    const buyerPhone = (sale.telephoneAcheteur || "").toLowerCase();
     const matchesSearch =
       clientName.includes(searchTerm.toLowerCase()) ||
+      buyerName.includes(searchTerm.toLowerCase()) ||
+      buyerPhone.includes(searchTerm.toLowerCase()) ||
       sale.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || sale.status === statusFilter;
@@ -216,11 +220,19 @@ export default function Sales() {
                   <TableCell>
                     <div>
                       <p className="font-medium text-foreground">
-                        {sale.clientName || "Comptoir"}
+                        {sale.clientName || 
+                         (sale.prenomAcheteur || sale.nomAcheteur || sale.telephoneAcheteur)
+                           ? `${sale.prenomAcheteur || ''} ${sale.nomAcheteur || ''}`.trim() || "Comptoir"
+                           : "Comptoir"}
                       </p>
                       {sale.clientPhone && (
                         <p className="text-xs text-muted-foreground">
                           {sale.clientPhone}
+                        </p>
+                      )}
+                      {sale.telephoneAcheteur && !sale.clientPhone && (
+                        <p className="text-xs text-muted-foreground">
+                          {sale.telephoneAcheteur}
                         </p>
                       )}
                     </div>
@@ -326,10 +338,23 @@ export default function Sales() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Client</p>
+                  <p className="text-sm text-muted-foreground">Client / Acheteur</p>
                   <p className="font-medium">
-                    {selectedSale.clientName || "Comptoir"}
+                    {selectedSale.clientName || 
+                     (selectedSale.prenomAcheteur || selectedSale.nomAcheteur || selectedSale.telephoneAcheteur)
+                       ? `${selectedSale.prenomAcheteur || ''} ${selectedSale.nomAcheteur || ''}`.trim() || "Comptoir"
+                       : "Comptoir"}
                   </p>
+                  {selectedSale.clientPhone && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedSale.clientPhone}
+                    </p>
+                  )}
+                  {selectedSale.telephoneAcheteur && !selectedSale.clientPhone && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedSale.telephoneAcheteur}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Statut</p>

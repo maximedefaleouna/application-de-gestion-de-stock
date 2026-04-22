@@ -159,6 +159,25 @@ export default function Receipt() {
               </div>
             ))}
           </div>
+          
+          {/* Buyer/Client Information */}
+          {(sale.clientName || sale.prenomAcheteur || sale.nomAcheteur || sale.telephoneAcheteur) && (
+            <div className="pt-3 border-t space-y-1">
+              <p className="text-sm font-semibold">Client / Acheteur</p>
+              {(sale.clientName || (sale.prenomAcheteur || sale.nomAcheteur)) && (
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Nom: </span>
+                  {sale.clientName || `${sale.prenomAcheteur || ''} ${sale.nomAcheteur || ''}`.trim()}
+                </p>
+              )}
+              {(sale.clientPhone || sale.telephoneAcheteur) && (
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Tél: </span>
+                  {sale.clientPhone || sale.telephoneAcheteur}
+                </p>
+              )}
+            </div>
+          )}
           <div className="pt-3 border-t space-y-1">
             <div className="flex justify-between font-semibold">
               <span>Total</span>

@@ -176,14 +176,7 @@ export default function Notifications() {
           )}
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={createTestNotification}
-            asChild={false}
-          >
-            🧪 Test
-          </Button>
+        
           <Button
             variant="outline"
             size="sm"
