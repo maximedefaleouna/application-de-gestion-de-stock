@@ -348,7 +348,7 @@ export default function Products() {
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
-          "Erreur lors du chargement des cat��gories",
+          "Erreur lors du chargement des categories",
       );
       setCategoryItems([]);
       setCategories([]);
@@ -415,7 +415,7 @@ export default function Products() {
 
   const handleAdd = async () => {
     if (!formData.name || !formData.reference) {
-      toast.error("Nom et r��f��rence obligatoires !");
+      toast.error("Nom et reférence obligatoires !");
       return;
     }
     if (!formData.category) {
@@ -558,7 +558,7 @@ export default function Products() {
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
-          "Erreur lors de la modification de la cat��gorie",
+          "Erreur lors de la modification de la catégorie",
       );
     }
   };
@@ -573,7 +573,7 @@ export default function Products() {
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
-          "Erreur lors de la suppression de la catégorie",
+          "Erreur lors de la suppression de la catégorie rassurez vous que tous les produits de cette catégorie sont supprimés",
       );
     }
   };
