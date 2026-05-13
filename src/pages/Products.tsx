@@ -5,31 +5,70 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Product } from "@/types";
-import { Plus, Search, Edit, Trash2, Package, Upload, X, Image, Tag, Settings2 } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Package,
+  Upload,
+  X,
+  Image,
+  Tag,
+  Settings2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { categorieService, produitService } from "@/services/api.service";
 
 type CategoryItem = { id: string; name: string };
 
-const formatCFA = (amount: number) => amount.toLocaleString('fr-FR') + ' F';
+const formatCFA = (amount: number) => amount.toLocaleString("fr-FR") + " F";
 
-const emptyProduct = (): Omit<Product, 'id'> => ({
-  name: '', reference: '', description: '', category: '', brand: '',
-  compatibleVehicles: [], buyPrice: 0, sellPrice: 0, stock: 0, minStock: 5,
-  imageUrl: '', available: true,
+const emptyProduct = (): Omit<Product, "id"> => ({
+  name: "",
+  reference: "",
+  description: "",
+  category: "",
+  brand: "",
+  compatibleVehicles: [],
+  buyPrice: 0,
+  sellPrice: 0,
+  stock: 0,
+  minStock: 5,
+  imageUrl: "",
+  available: true,
 });
 
 interface ProductFormFieldsProps {
-  formData: Omit<Product, 'id'>;
-  setFormData: React.Dispatch<React.SetStateAction<Omit<Product, 'id'>>>;
+  formData: Omit<Product, "id">;
+  setFormData: React.Dispatch<React.SetStateAction<Omit<Product, "id">>>;
   previewImage: string;
   setPreviewImage: React.Dispatch<React.SetStateAction<string>>;
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -37,14 +76,14 @@ interface ProductFormFieldsProps {
   categories: string[];
 }
 
-const ProductFormFields: React.FC<ProductFormFieldsProps> = ({ 
-  formData, 
-  setFormData, 
-  previewImage, 
-  setPreviewImage, 
-  fileInputRef, 
+const ProductFormFields: React.FC<ProductFormFieldsProps> = ({
+  formData,
+  setFormData,
+  previewImage,
+  setPreviewImage,
+  fileInputRef,
   handleImageUpload,
-  categories 
+  categories,
 }) => (
   <div className="space-y-6 py-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin">
     {/* Section: Image */}
@@ -59,27 +98,58 @@ const ProductFormFields: React.FC<ProductFormFieldsProps> = ({
           onClick={() => fileInputRef.current?.click()}
         >
           {previewImage ? (
-            <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="text-center">
               <Upload className="w-6 h-6 mx-auto text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="text-[10px] text-muted-foreground mt-1 block">Ajouter</span>
+              <span className="text-[10px] text-muted-foreground mt-1 block">
+                Ajouter
+              </span>
             </div>
           )}
         </div>
         <div className="flex-1 space-y-2">
-          <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()} asChild={false}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => fileInputRef.current?.click()}
+            asChild={false}
+          >
             <Upload className="w-4 h-4 mr-2" />
             Choisir une image
           </Button>
           {previewImage && (
-            <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => { setPreviewImage(""); setFormData(prev => ({ ...prev, imageUrl: "" })); } } asChild={false}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:text-destructive"
+              onClick={() => {
+                setPreviewImage("");
+                setFormData((prev) => ({ ...prev, imageUrl: "" }));
+              }}
+              asChild={false}
+            >
               <X className="w-4 h-4 mr-2" />
               Retirer
             </Button>
           )}
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-          <p className="text-xs text-muted-foreground">JPG, PNG ou WebP. Max 5 MB.</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+          <p className="text-xs text-muted-foreground">
+            JPG, PNG ou WebP. Max 5 MB.
+          </p>
         </div>
       </div>
     </div>
@@ -92,17 +162,38 @@ const ProductFormFields: React.FC<ProductFormFieldsProps> = ({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Nom du produit <span className="text-destructive">*</span></Label>
-          <Input placeholder="Ex: Plaquettes de frein AV" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+          <Label className="text-xs text-muted-foreground">
+            Nom du produit <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            placeholder="Ex: Plaquettes de frein AV"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Référence <span className="text-destructive">*</span></Label>
-          <Input placeholder="Ex: PF-TOY-001" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} />
+          <Label className="text-xs text-muted-foreground">
+            Référence <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            placeholder="Ex: PF-TOY-001"
+            value={formData.reference}
+            onChange={(e) =>
+              setFormData({ ...formData, reference: e.target.value })
+            }
+          />
         </div>
       </div>
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Description</Label>
-        <Textarea placeholder="Décrivez le produit, compatibilités, spécifications..." rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+        <Textarea
+          placeholder="Décrivez le produit, compatibilités, spécifications..."
+          rows={3}
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+        />
       </div>
     </div>
 
@@ -114,17 +205,34 @@ const ProductFormFields: React.FC<ProductFormFieldsProps> = ({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Catégorie <span className="text-destructive">*</span></Label>
-          <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-            <SelectTrigger><SelectValue placeholder="Sélectionner une catégorie" /></SelectTrigger>
+          <Label className="text-xs text-muted-foreground">
+            Catégorie <span className="text-destructive">*</span>
+          </Label>
+          <Select
+            value={formData.category}
+            onValueChange={(v) => setFormData({ ...formData, category: v })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une catégorie" />
+            </SelectTrigger>
             <SelectContent>
-              {categories.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Marque</Label>
-          <Input placeholder="Ex: Bosch, Valeo..." value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} />
+          <Input
+            placeholder="Ex: Bosch, Valeo..."
+            value={formData.brand}
+            onChange={(e) =>
+              setFormData({ ...formData, brand: e.target.value })
+            }
+          />
         </div>
       </div>
     </div>
@@ -132,23 +240,53 @@ const ProductFormFields: React.FC<ProductFormFieldsProps> = ({
     {/* Section: Prix & Stock */}
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">$</span>
+        <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+          $
+        </span>
         Prix & Stock
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Prix de vente (FCFA)</Label>
-          <Input type="number" placeholder="0" value={formData.sellPrice || ""} onChange={(e) => setFormData({ ...formData, sellPrice: Number(e.target.value) })} />
+          <Label className="text-xs text-muted-foreground">
+            Prix de vente (FCFA)
+          </Label>
+          <Input
+            type="number"
+            placeholder="0"
+            value={formData.sellPrice || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, sellPrice: Number(e.target.value) })
+            }
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Stock initial</Label>
-          <Input type="number" placeholder="0" value={formData.stock || ""} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })} />
+          <Input
+            type="number"
+            placeholder="0"
+            value={formData.stock || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, stock: Number(e.target.value) })
+            }
+          />
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Seuil d'alerte stock</Label>
-        <Input type="number" placeholder="5" value={formData.minStock || ""} onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })} className="max-w-[200px]" />
-        <p className="text-[11px] text-muted-foreground">Vous serez alerté quand le stock descend sous ce seuil</p>
+        <Label className="text-xs text-muted-foreground">
+          Seuil d'alerte stock
+        </Label>
+        <Input
+          type="number"
+          placeholder="5"
+          value={formData.minStock || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, minStock: Number(e.target.value) })
+          }
+          className="max-w-[200px]"
+        />
+        <p className="text-[11px] text-muted-foreground">
+          Vous serez alerté quand le stock descend sous ce seuil
+        </p>
       </div>
     </div>
   </div>
@@ -163,15 +301,23 @@ export default function Products() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [newCategory, setNewCategory] = useState("");
-  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null);
+  const [editingCategoryIndex, setEditingCategoryIndex] = useState<
+    number | null
+  >(null);
   const [editingCategoryValue, setEditingCategoryValue] = useState("");
-  const [formData, setFormData] = useState<Omit<Product, 'id'>>(emptyProduct());
+  const [formData, setFormData] = useState<Omit<Product, "id">>(emptyProduct());
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const normalizeCategories = (raw: any): CategoryItem[] => {
-    const payload = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
+    const payload = Array.isArray(raw?.data)
+      ? raw.data
+      : Array.isArray(raw)
+        ? raw
+        : [];
     return payload
       .map((item: any) => ({
         id: String(item?.id ?? item?._id ?? item?.nom ?? item?.name ?? ""),
@@ -185,7 +331,10 @@ export default function Products() {
       const response = await produitService.getAll();
       setProducts(response.data || []);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors du chargement des produits");
+      toast.error(
+        error?.response?.data?.message ||
+          "Erreur lors du chargement des produits",
+      );
       setProducts([]);
     }
   };
@@ -197,7 +346,10 @@ export default function Products() {
       setCategoryItems(items);
       setCategories(items.map((item) => item.name));
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors du chargement des cat��gories");
+      toast.error(
+        error?.response?.data?.message ||
+          "Erreur lors du chargement des cat��gories",
+      );
       setCategoryItems([]);
       setCategories([]);
     }
@@ -209,10 +361,12 @@ export default function Products() {
   }, []);
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.brand.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
+    const matchesCategory =
+      categoryFilter === "all" || product.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
@@ -222,9 +376,15 @@ export default function Products() {
 
     try {
       await produitService.update(id, { available: !current.available });
-      setProducts(products.map((p) => (p.id === id ? { ...p, available: !p.available } : p)));
+      setProducts(
+        products.map((p) =>
+          p.id === id ? { ...p, available: !p.available } : p,
+        ),
+      );
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de la mise à jour");
+      toast.error(
+        error?.response?.data?.message || "Erreur lors de la mise à jour",
+      );
     }
   };
 
@@ -291,7 +451,9 @@ export default function Products() {
           stock: Number(formData.stock || 0),
           minStock: Number(formData.minStock || 5),
           available: Boolean(formData.available),
-          imageUrl: /^https?:\/\//.test(formData.imageUrl || "") ? formData.imageUrl : "",
+          imageUrl: /^https?:\/\//.test(formData.imageUrl || "")
+            ? formData.imageUrl
+            : "",
         };
 
     try {
@@ -300,7 +462,9 @@ export default function Products() {
       setIsAddDialogOpen(false);
       toast.success("Produit ajouté avec succés !");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de l'ajout du produit");
+      toast.error(
+        error?.response?.data?.message || "Erreur lors de l'ajout du produit",
+      );
     }
   };
 
@@ -318,7 +482,8 @@ export default function Products() {
         stock: Number(formData.stock || 0),
         minStock: Number(formData.minStock || 5),
         imageUrl:
-          /^https?:\/\//.test(formData.imageUrl || "") || (formData.imageUrl || "").startsWith("/uploads/")
+          /^https?:\/\//.test(formData.imageUrl || "") ||
+          (formData.imageUrl || "").startsWith("/uploads/")
             ? formData.imageUrl
             : editingProduct.imageUrl || "",
         available: Boolean(formData.available),
@@ -328,17 +493,31 @@ export default function Products() {
       setEditingProduct(null);
       toast.success("Produit modifié avec succés !");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de la modification du produit");
+      toast.error(
+        error?.response?.data?.message ||
+          "Erreur lors de la modification du produit",
+      );
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedProduct) return;
+
     try {
-      await produitService.delete(id);
-      setProducts(products.filter((p) => p.id !== id));
+      await produitService.delete(selectedProduct.id);
+      setProducts(products.filter((p) => p.id !== selectedProduct.id));
       toast.success("Produit supprimé !");
+      setIsDeleteDialogOpen(false);
+      setSelectedProduct(null);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de la suppression");
+      toast.error(
+        error?.response?.data?.message || "Erreur lors de la suppression",
+      );
     }
   };
 
@@ -349,12 +528,18 @@ export default function Products() {
       return;
     }
     try {
-      await categorieService.create({ nom: newCategory.trim(), description: "" });
+      await categorieService.create({
+        nom: newCategory.trim(),
+        description: "",
+      });
       await loadCategories();
       setNewCategory("");
       toast.success("Catégorie ajoutée !");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de l'ajout de la cat��gorie");
+      toast.error(
+        error?.response?.data?.message ||
+          "Erreur lors de l'ajout de la cat��gorie",
+      );
     }
   };
 
@@ -363,13 +548,18 @@ export default function Products() {
     const category = categoryItems[index];
     if (!category?.id) return;
     try {
-      await categorieService.update(category.id, { nom: editingCategoryValue.trim() });
+      await categorieService.update(category.id, {
+        nom: editingCategoryValue.trim(),
+      });
       await Promise.all([loadCategories(), loadProducts()]);
       setEditingCategoryIndex(null);
       setEditingCategoryValue("");
       toast.success("Catégorie modifiée !");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de la modification de la cat��gorie");
+      toast.error(
+        error?.response?.data?.message ||
+          "Erreur lors de la modification de la cat��gorie",
+      );
     }
   };
 
@@ -381,18 +571,29 @@ export default function Products() {
       await Promise.all([loadCategories(), loadProducts()]);
       toast.success(`Catégorie "${category.name}" supprimée`);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Erreur lors de la suppression de la catégorie");
+      toast.error(
+        error?.response?.data?.message ||
+          "Erreur lors de la suppression de la catégorie",
+      );
     }
   };
 
   return (
-    <AdminLayout title="Catalogue Produits" subtitle="Gérez votre inventaire de pièces détachées">
+    <AdminLayout
+      title="Catalogue Produits"
+      subtitle="Gérez votre inventaire de pièces détachées"
+    >
       {/* Header Actions */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Rechercher par nom, référence, marque..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            <Input
+              placeholder="Rechercher par nom, référence, marque..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-full sm:w-48">
@@ -401,17 +602,27 @@ export default function Products() {
             <SelectContent>
               <SelectItem value="all">Toutes les catégories</SelectItem>
               {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button className="gradient-primary text-primary-foreground shadow-glow" onClick={openAddDialog} asChild={false}>
+          <Button
+            className="gradient-primary text-primary-foreground shadow-glow"
+            onClick={openAddDialog}
+            asChild={false}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Ajouter un produit
           </Button>
-          <Button variant="outline" onClick={() => setIsCategoryDialogOpen(true)} asChild={false}>
+          <Button
+            variant="outline"
+            onClick={() => setIsCategoryDialogOpen(true)}
+            asChild={false}
+          >
             <Tag className="w-4 h-4 mr-2" />
             Gérer catégories
           </Button>
@@ -421,7 +632,11 @@ export default function Products() {
       {/* Products count */}
       <div className="flex items-center gap-2 mb-4">
         <Package className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">{filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} trouv{filteredProducts.length > 1 ? 's' : ''}.</span>
+        <span className="text-sm text-muted-foreground">
+          {filteredProducts.length} produit
+          {filteredProducts.length > 1 ? "s" : ""} trouv
+          {filteredProducts.length > 1 ? "s" : ""}.
+        </span>
       </div>
 
       {/* Products Grid */}
@@ -434,7 +649,11 @@ export default function Products() {
           >
             <div className="relative h-36 md:h-40 bg-secondary">
               {product.imageUrl ? (
-                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Package className="w-12 h-12 text-muted-foreground/30" />
@@ -442,16 +661,32 @@ export default function Products() {
               )}
               <div className="absolute top-2 left-2 flex gap-1">
                 {product.stock <= product.minStock ? (
-                  <Badge variant="destructive" className="text-[10px]">Stock bas ({product.stock})</Badge>
+                  <Badge variant="destructive" className="text-[10px]">
+                    Stock bas ({product.stock})
+                  </Badge>
                 ) : (
-                  <Badge variant="success" className="text-[10px]">En stock ({product.stock})</Badge>
+                  <Badge variant="success" className="text-[10px]">
+                    En stock ({product.stock})
+                  </Badge>
                 )}
               </div>
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="secondary" size="icon" className="h-8 w-8 shadow-md" onClick={() => openEditDialog(product)} asChild={false}>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 shadow-md"
+                  onClick={() => openEditDialog(product)}
+                  asChild={false}
+                >
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button variant="secondary" size="icon" className="h-8 w-8 shadow-md hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(product.id)} asChild={false}>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 shadow-md hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={() => handleDeleteClick(product)}
+                  asChild={false}
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -459,23 +694,42 @@ export default function Products() {
             <div className="p-3 md:p-4">
               <div className="flex items-start justify-between mb-1">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate text-sm md:text-base">{product.name}</h3>
-                  <p className="text-xs text-muted-foreground">{product.reference} · {product.brand}</p>
+                  <h3 className="font-semibold text-foreground truncate text-sm md:text-base">
+                    {product.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {product.reference} · {product.brand}
+                  </p>
                 </div>
-                <span className="text-base md:text-lg font-bold text-primary ml-2 whitespace-nowrap">{formatCFA(product.sellPrice)}</span>
+                <span className="text-base md:text-lg font-bold text-primary ml-2 whitespace-nowrap">
+                  {formatCFA(product.sellPrice)}
+                </span>
               </div>
-              <Badge variant="secondary" className="mt-1 mb-2 text-[10px]">{product.category}</Badge>
-              <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mb-3">{product.description}</p>
+              <Badge variant="secondary" className="mt-1 mb-2 text-[10px]">
+                {product.category}
+              </Badge>
+              <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mb-3">
+                {product.description}
+              </p>
               <div className="flex items-center justify-between pt-3 border-t">
                 <div className="text-xs text-muted-foreground">
                   <span>Achat: {formatCFA(product.buyPrice)}</span>
                   {product.buyPrice > 0 && (
                     <span className="ml-2 text-success font-medium">
-                      +{Math.round(((product.sellPrice - product.buyPrice) / product.buyPrice) * 100)}%
+                      +
+                      {Math.round(
+                        ((product.sellPrice - product.buyPrice) /
+                          product.buyPrice) *
+                          100,
+                      )}
+                      %
                     </span>
                   )}
                 </div>
-                <Switch checked={product.available} onCheckedChange={() => toggleAvailability(product.id)} />
+                <Switch
+                  checked={product.available}
+                  onCheckedChange={() => toggleAvailability(product.id)}
+                />
               </div>
             </div>
           </div>
@@ -484,12 +738,17 @@ export default function Products() {
 
       {/* Add Product Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-         <DialogContent className="max-w-2xl max-h-[90vh]">
-          <DialogHeader>    
-            <DialogTitle className="flex items-center gap-2"><Plus className="w-5 h-5 text-primary" />Nouveau produit</DialogTitle>
-            <DialogDescription>Ajoutez une pièce détachée au catalogue</DialogDescription>
+        <DialogContent className="max-w-2xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-primary" />
+              Nouveau produit
+            </DialogTitle>
+            <DialogDescription>
+              Ajoutez une pièce détachée au catalogue
+            </DialogDescription>
           </DialogHeader>
-          <ProductFormFields 
+          <ProductFormFields
             formData={formData}
             setFormData={setFormData}
             previewImage={previewImage}
@@ -499,8 +758,20 @@ export default function Products() {
             categories={categories}
           />
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} asChild={false}>Annuler</Button>
-            <Button className="gradient-primary text-primary-foreground" onClick={handleAdd} asChild={false}>Ajouter le produit</Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsAddDialogOpen(false)}
+              asChild={false}
+            >
+              Annuler
+            </Button>
+            <Button
+              className="gradient-primary text-primary-foreground"
+              onClick={handleAdd}
+              asChild={false}
+            >
+              Ajouter le produit
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -509,10 +780,15 @@ export default function Products() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Edit className="w-5 h-5 text-primary" />Modifier le produit</DialogTitle>
-            <DialogDescription>Modifiez les informations du produit</DialogDescription>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-primary" />
+              Modifier le produit
+            </DialogTitle>
+            <DialogDescription>
+              Modifiez les informations du produit
+            </DialogDescription>
           </DialogHeader>
-          <ProductFormFields 
+          <ProductFormFields
             formData={formData}
             setFormData={setFormData}
             previewImage={previewImage}
@@ -522,18 +798,38 @@ export default function Products() {
             categories={categories}
           />
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} asChild={false}>Annuler</Button>
-            <Button className="gradient-primary text-primary-foreground" onClick={handleEdit} asChild={false}>Enregistrer</Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+              asChild={false}
+            >
+              Annuler
+            </Button>
+            <Button
+              className="gradient-primary text-primary-foreground"
+              onClick={handleEdit}
+              asChild={false}
+            >
+              Enregistrer
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Category Management Dialog */}
-      <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
+      <Dialog
+        open={isCategoryDialogOpen}
+        onOpenChange={setIsCategoryDialogOpen}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Settings2 className="w-5 h-5 text-primary" />Gérer les catégories</DialogTitle>
-            <DialogDescription>Ajoutez, modifiez ou supprimez des catégories de produits</DialogDescription>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-primary" />
+              Gérer les catégories
+            </DialogTitle>
+            <DialogDescription>
+              Ajoutez, modifiez ou supprimez des catégories de produits
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             {/* Add new */}
@@ -544,37 +840,81 @@ export default function Products() {
                 onChange={(e) => setNewCategory(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addCategory()}
               />
-              <Button onClick={addCategory} className="gradient-primary text-primary-foreground shrink-0" asChild={false}>
+              <Button
+                onClick={addCategory}
+                className="gradient-primary text-primary-foreground shrink-0"
+                asChild={false}
+              >
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
             {/* List */}
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {categories.map((cat, index) => (
-                <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                <div
+                  key={index}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                >
                   {editingCategoryIndex === index ? (
                     <>
                       <Input
                         value={editingCategoryValue}
-                        onChange={(e) => setEditingCategoryValue(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && updateCategory(index)}
+                        onChange={(e) =>
+                          setEditingCategoryValue(e.target.value)
+                        }
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && updateCategory(index)
+                        }
                         className="h-8 text-sm"
                         autoFocus
                       />
-                      <Button size="sm" variant="ghost" onClick={() => updateCategory(index)} className="shrink-0 h-8" asChild={false}>OK</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingCategoryIndex(null)} className="shrink-0 h-8" asChild={false}><X className="w-3 h-3" /></Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => updateCategory(index)}
+                        className="shrink-0 h-8"
+                        asChild={false}
+                      >
+                        OK
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingCategoryIndex(null)}
+                        className="shrink-0 h-8"
+                        asChild={false}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
                     </>
                   ) : (
                     <>
                       <Tag className="w-4 h-4 text-primary shrink-0" />
-                      <span className="flex-1 text-sm font-medium text-foreground">{cat}</span>
+                      <span className="flex-1 text-sm font-medium text-foreground">
+                        {cat}
+                      </span>
                       <Badge variant="secondary" className="text-[10px]">
-                        {products.filter(p => p.category === cat).length}
+                        {products.filter((p) => p.category === cat).length}
                       </Badge>
-                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => { setEditingCategoryIndex(index); setEditingCategoryValue(cat); }} asChild={false}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0"
+                        onClick={() => {
+                          setEditingCategoryIndex(index);
+                          setEditingCategoryValue(cat);
+                        }}
+                        asChild={false}
+                      >
                         <Edit className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteCategory(index)} asChild={false}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                        onClick={() => deleteCategory(index)}
+                        asChild={false}
+                      >
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </>
@@ -585,7 +925,31 @@ export default function Products() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action ne peut pas être annulée. Le produit{" "}
+              <strong>{selectedProduct?.name}</strong> sera définitivement
+              supprimé.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
-
