@@ -1,73 +1,139 @@
-# Welcome to your Lovable project
+# Pieces Shop - Application Frontend de Gestion de Stock, Ventes et Point de Vente (POS)
 
-## Project info
+Application web complete, moderne et responsive de gestion commerciale, concue pour le pilotage d'inventaire de pieces detachees, la facturation en point de vente (POS), le recouvrement des creances clients et l'analyse financiere en temps reel.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+L'interface propose une experience utilisateur soignee, avec un theme sombre professionnel enrichi de touches orange, une reactivite instantanee et un suivi rigoureux des donnees commerciales libellees en Francs CFA (FCFA).
 
-## How can I edit this code?
+![Tableau de bord de synthese commerciale](screenshots/dashboard.jpg)
 
-There are several ways of editing your application.
+## Apercu Visuel de la Plateforme
 
-**Use Lovable**
+![Catalogue interactif des produits et marges](screenshots/catalogue_produits.jpg)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+![Gestion du stock et flux d'entrees sorties](screenshots/gestion_stock.jpg)
 
-Changes made via Lovable will be committed automatically to this repo.
+![Centre d'alertes et de notifications](screenshots/alertes_notifications.png)
 
-**Use your preferred IDE**
+![Statistiques de performance et rapports decisionnels](screenshots/statistiques_rapports.jpg)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+![Infrastructure de donnees cloud connectee](screenshots/database_neon.jpg)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Fonctionnalites Principales
 
-Follow these steps:
+### 1. Tableau de Bord Executif
+- Indicateurs cles d'activite (KPIs) : nombre de ventes du jour, chiffre d'affaires quotidien (FCFA), articles en stock critique et montant total des credits en cours.
+- Courbe d'evolution hebdomadaire des revenus avec tooltips interactifs.
+- Classement des produits les plus vendus (filtres a huile, plaquettes de frein, bougies d'allumage, batteries).
+- Flux des transactions recentes et alertes immediates sur les seuils d'inventaire bas.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 2. Point de Vente (POS) et Facturation
+- Terminal de caisse rapide adapte aux ventes au comptoir.
+- Recherche instantanee d'articles par reference, designation ou marque.
+- Prise en charge des differents modes de reglement : especes, mobile money, carte bancaire et vente a credit.
+- Association directe de la transaction a un client debiteur ou a un acheteur de passage (nom, prenom, telephone).
+- Generation automatique des recus imprimables et telechargeables au format PDF.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 3. Catalogue Produits et Suivi des Marges
+- Grille responsive de cartes d'articles avec photographies reelles et badges d'etat (En stock, Stock bas).
+- Fiches tarifaires detaillees affichant le prix d'achat fournisseur, le taux de marge commerciale en pourcentage et le prix de vente public.
+- Interrupteur d'activation / desactivation immediate de la disponibilite en boutique.
+- Filtrage avance par categorie de pieces (Freinage, Filtration, Suspension, Electrique, Distribution, Allumage, Lubrifiants).
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 4. Controle d'Inventaire et Tracabilite des Stocks
+- Tableau de bord exhaustif du niveau de stock par article compare a son seuil minimal d'alerte.
+- Estimation globale de la valorisation financiere du stock magasin.
+- Journal d'audit des derniers mouvements tracant precisement les reapprovisionnements fournisseurs (+), les sorties de ventes (-) et les ajustements d'inventaire manuels.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 5. Recouvrement des Creances et Echeances
+- Suivi individualise des dettes clients avec date limite de paiement.
+- Identification automatique des creances en souffrance (dettes superieures a 30 jours).
+- Interface dediee a l'enregistrement des paiements partiels et a la reduction progressive du solde restant.
+
+### 6. Alertes et Notifications Intelligentes
+- Centre de notification centralise avec filtres par typologie (Ventes, Stock, Credits, Systeme).
+- Declenchement automatique d'alertes des qu'un seuil critique est atteint ou qu'un credit arrive a echeance.
+- Actions rapides d'acquittement : marquer comme lu ou supprimer la notification.
+
+### 7. Statistiques et Rapports Decisionnels
+- Visualisation graphique des revenus et des volumes de ventes journaliers par histogrammes et courbes.
+- Graphique circulaire de repartition des ventes par categorie d'articles.
+- Exportation des rapports de gestion aux formats CSV et PDF pour la comptabilite.
+
+## Architecture Technique Frontend
+
+- Framework applicatif : React 18 avec TypeScript garantissant un typage statique rigoureux de l'ensemble des modeles de donnees.
+- Outil de build : Vite pour une compilation ultra-rapide et un rechargement a chaud instantane.
+- Design System et Stylisation : Tailwind CSS combine aux composants modulaires accessibles de Radix UI.
+- Visualisation de donnees : Recharts pour les graphiques statistiques dynamiques et responsives.
+- Communication API : Axios centralise au sein d'un contexte React global (AppContext) assurant la synchronisation fluide avec l'API RESTful.
+- Gestion du routage : React Router DOM 6 avec protection des routes selon les roles (Admin vs Vendeur).
+- Typographie et Iconographie : Plus Jakarta Sans et icones vectorielles Lucide React.
+- Generation de documents : html2pdf.js pour la conversion et l'impression des factures et tickets.
+
+## Securite et Variables d'Environnement
+
+Par souci de confidentialite et de securite des infrastructures, le fichier `.env` contenant l'URL de connexion au backend est exclu du depot Git.
+
+Un fichier modele `.env.example` est mis a disposition a la racine du projet. Pour initialiser l'environnement local :
+
+```bash
+cp .env.example .env
+```
+
+Puis adaptez la variable selon votre environnement cible :
+
+```env
+# URL de l'API Backend REST
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+## Guide d'Installation et Lancement Local
+
+### Prerequis
+
+- Node.js (version 18 ou superieure recommandee)
+- npm ou bun
+- L'API backend demarree (en local sur le port 3000 ou hebergee a distance)
+
+### Etapes d'Installation
+
+1. Cloner le depot du frontend :
+
+```bash
+git clone https://github.com/maximedefaleouna/application-de-gestion-de-stock.git
+cd application-de-gestion-de-stock
+```
+
+2. Installer les dependances :
+
+```bash
+npm install
+```
+
+3. Configurer l'environnement :
+
+```bash
+cp .env.example .env
+```
+
+4. Lancer le serveur de developpement :
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+L'application sera accessible a l'adresse `http://localhost:8080`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+5. Compiler pour la mise en production :
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Auteur
 
-## What technologies are used for this project?
+- Concepteur et Developpeur : Maxime DEFALEOUNA ([@maximedefaleouna](https://github.com/maximedefaleouna))
 
-This project is built with:
+## Licence
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Ce projet est sous licence MIT. Il est libre d'utilisation, de modification et de distribution.
